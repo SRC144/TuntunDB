@@ -25,3 +25,6 @@ class SequentialFileIndex:
 
     def range_search(self):
         pass
+
+    def remove(self):
+        pass

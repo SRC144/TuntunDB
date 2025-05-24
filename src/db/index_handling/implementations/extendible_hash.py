@@ -23,8 +23,5 @@ class ExtendibleHashingIndex:
     def search(self):
         pass
 
-    def range_search(self):
-        pass
-
     def remove(self):
         pass

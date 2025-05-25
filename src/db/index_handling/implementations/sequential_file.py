@@ -1,4 +1,4 @@
-from cursors import LineCursor #definir cursor adicional si es necesario
+from ...cursors import LineCursor #definir cursor adicional si es necesario
 
 #asumir que el objeto que recibimos para leer la tabla es una cadena
 #de su estructura ejemplo 'iiff'

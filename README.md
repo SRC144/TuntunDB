@@ -86,3 +86,4 @@ create table cancer from file 'cancer_data.csv;
 CREATE TABLE Usuarios (...);
 SELECT * FROM Usuarios WHERE edad BETWEEN 25 and 33;
 ```
+## [Enlace al Video](https://www.youtube.com/watch?v=4qRWlyFtNLA)

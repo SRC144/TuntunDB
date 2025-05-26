@@ -75,7 +75,8 @@ Sistema de gestión de bases de datos desarrollado para el curso de Base de Dato
 - Estilos: Tailwind CSS
 
 ## Requisitos
-Ver `requirements.txt` (backend) y `package.json` (frontend)
+- Para el backend crear un entorno python e installar `requirements.txt` con `pip install -r requirements.txt`. Iniciar el servidor con `src/run.py` .
+- Para el frontend ir a src/frontend e instalar dependencias con `npm install package.json`. Luego iniciar servidor con `npm start`.
 
 ## Ejemplo de Uso
 ```sql
@@ -87,3 +88,7 @@ CREATE TABLE Usuarios (...);
 SELECT * FROM Usuarios WHERE edad BETWEEN 25 and 33;
 ```
 ## [Enlace al Video](https://www.youtube.com/watch?v=4qRWlyFtNLA)
+## Referencias de literatura para el B+ e idea del Extendible Hash (El último no integrado al gestor)
+- Elmasri, R., & Navathe, S. B. (2015). Fundamentals of database systems (7th ed.). Pearson. (Insercion y busqueda del B+)
+- Jannink, J. (1995). Implementing deletion in B+-trees. ACM SIGMOD Record, 24(1), 33–38. [](https://doi.org/10.1145/202660.202666)
+- Fagin, R., Nievergelt, J., Pippenger, N., & Strong, H. R. (1979). Extendible hashing—a fast access method for dynamic files. ACM Transactions on Database Systems, 4(3), 315–344. [](https://doi.org/10.1145/320083.320092)

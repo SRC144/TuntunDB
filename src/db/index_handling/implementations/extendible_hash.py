@@ -1,4 +1,4 @@
-from db.cursors.block_cursor import BlockCursor
+from ...cursors import BlockCursor
 import struct
 
 class ExtendibleHashingIndex:

@@ -18,7 +18,6 @@ class DeleteCommand:
     
     def execute(self, parsed_query: Dict[str, Any]) -> Dict[str, Any]:
         """Execute a DELETE query"""
-        logger.debug("Starting DELETE command execution")
         table_name = parsed_query["table_name"]
         
         # Get table info
@@ -28,12 +27,10 @@ class DeleteCommand:
             return {"status": "error", "message": f"Table {table_name} not found"}
 
         if "filters" not in parsed_query or not parsed_query["filters"]:
-            logger.debug("No filters found in DELETE query")
             return {"status": "error", "message": "DELETE requires WHERE clause"}
             
         filter = parsed_query["filters"][0]  # For now, handle only first filter
         if filter["operation"] != "=":
-            logger.debug(f"Unsupported operation: {filter['operation']}")
             return {"status": "error", "message": "Only equality conditions are supported for DELETE"}
 
         # Get column info for the filter
@@ -47,12 +44,10 @@ class DeleteCommand:
             return {"status": "error", "message": f"Column {col} not found"}
             
         col_type = table_info["columns"][col_idx]["type"]
-        logger.debug(f"Using filter on column: {col} (type: {col_type})")
 
         # Convert search value to appropriate type
         try:
             search_value = TypeConverter.convert_value(filter["value"], col_type)
-            logger.debug(f"Converted search value {filter['value']} to {search_value}")
         except Exception as e:
             logger.error(f"Error converting search value: {str(e)}")
             return {"status": "error", "message": f"Invalid search value: {str(e)}"}
@@ -61,7 +56,6 @@ class DeleteCommand:
         record_pos = None
         if col in table_info["indexes"]:
             index_type = table_info["indexes"][col]
-            logger.debug(f"Using {index_type} index for search on column {col}")
             
             index = IndexFactory.get_index(
                 index_type=index_type.lower(),
@@ -81,18 +75,15 @@ class DeleteCommand:
                     search_key = struct.pack('=d', search_value)
                 else:
                     search_key = search_value
-                logger.debug(f"Prepared search key bytes: {search_key}")
             else:
                 search_key = search_value
             
             record_pos = index.search(search_key)
-            logger.debug(f"Index search result: {record_pos}")
         else:
             logger.error(f"No index available for column {col}")
             return {"status": "error", "message": f"DELETE requires an index on column {col}"}
 
         if record_pos is None:
-            logger.debug("Record not found")
             return {
                 "status": "error",
                 "message": f"Record with {col}={filter['value']} not found"
@@ -116,7 +107,6 @@ class DeleteCommand:
                 
                 # Check if already deleted (first byte is deletion marker)
                 if record_values[0] == b'\x01':  # Marker for deleted
-                    logger.debug("Record already marked as deleted")
                     return {
                         "status": "success",
                         "message": f"Record with {col}={filter['value']} was already deleted"
@@ -131,7 +121,6 @@ class DeleteCommand:
                 
                 # Check if table should be compacted
                 if self.table_manager.should_compact(table_name):
-                    logger.debug("Table needs compaction")
                     compaction_result = self.compactor.compact_table(table_name)
                     if compaction_result.get("status") == "error":
                         logger.error(f"Compaction failed: {compaction_result.get('message')}")

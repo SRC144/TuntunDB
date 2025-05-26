@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, current_app
 from db.engine.query_handler import QueryHandler
 from .utils import CustomJSONEncoder
 import json
@@ -36,30 +36,22 @@ def get_tables():
 def execute_query():
     """Execute a SQL query"""
     if not request.is_json:
-        print("[DEBUG] Request is not JSON")
         return json_response({'error': 'Content-Type must be application/json'}, status=400)
         
     data = request.get_json()
-    print(f"[DEBUG] Received query request: {data}")
     
     if 'query' not in data:
-        print("[DEBUG] No query in request")
         return json_response({'error': 'Query is required'}, status=400)
         
     query = data['query']
-    print(f"[DEBUG] Processing query: {query}")
     
     try:
         result = handler.execute_query(query)
-        print(f"[DEBUG] Query result: {result}")
         # If result contains an error, return it with status 400
         if isinstance(result, dict) and 'error' in result:
-            print(f"[DEBUG] Query error: {result['error']}")
             return json_response(result, status=400)
-        print("[DEBUG] Query successful")
         return json_response(result)
     except Exception as e:
-        print(f"[DEBUG] Query exception: {str(e)}")
         return json_response({'error': str(e)}, status=400)
 
 @api_bp.route('/batch', methods=['POST'])

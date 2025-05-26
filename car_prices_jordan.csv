@@ -1,0 +1,465 @@
+id,Model,Property,Power,Price
+0,Byd F0 2018,Manual,1000 CC,"6,900"
+1,Suzuki Alto 2023,manual,800 CC,"8,250"
+2,Suzuki Celerio 2019,Automatic,1000 CC,"10,499"
+3,Changan E Star 2023,Automatic,0 CC,"10,990"
+4,Hyundai Grand i10 2020,Automatic,1250 CC,"11,500"
+5,Baic X35 2023,manual / MT,1500 CC,"11,900"
+6,Nissan Micra 2020,Automatic,1500 CC,"11,950"
+7,Kia Picanto 2021,Automatic,1200 CC,"12,210"
+8,Hyundai Atos 2021,Manual,1100 CC,"13,000"
+9,Kia Pegas 2021,Manual,1400 CC,"13,400"
+10,Mitsubishi Mirage 2021,Automatic / GLX,1200 CC,"13,950"
+11,Changan V7 2021,Automatic / Comfort,1500 CC,"14,000"
+12,Changan V3 2023,Automatic,"1500 CC
+Turbo","14,000"
+13,Kia Picanto 2023,Automatic,1200 CC,"14,100"
+14,Kia Picanto 2023,Automatic / full option,1200 CC,"14,250"
+15,Mitsubishi Attrage 2021,Automatic,1200 CC,"14,500"
+16,Lada Vesta 2019,Automatic,1600 CC,"14,500"
+17,MG 5 2023,Automatic / STD,1500 CC,"14,900"
+18,Byd F3 2022,Automatic / Comfort,1500 CC,"14,950"
+19,Changan CX 30 2018,Automatic,1600 CC,"15,000"
+20,GAC GA4 2021,Manual,1500 CC,"15,500"
+21,Suzuki Baleno 2023,Automatic / GL,1500 CC,"15,500"
+22,Renault Logan 2021,Automatic / E2,1600 CC,"16,000"
+23,Suzuki Ertiga 2023,Automatic,1500 CC,"16,250"
+24,Peugeot 301 2023,Automatic / Allure,1600 CC,"16,500"
+25,Changan Eado 2023,Automatic / DT,1600 CC,"16,500"
+26,Changan CS 15 2023,Automatic,1500 CC,"16,500"
+27,Jac S3 2022,Automatic,1600 CC,"16,700"
+28,Suzuki Ciaz 2022,Automatic / GLX,1400 CC,"16,900"
+29,Dongfeng A30 2023,Automatic / E 1,1500 CC,"17,000"
+30,GAC GS3 2023,Automatic,1500 CC,"17,000"
+31,Suzuki Baleno 2023,Automatic / GLX,1500 CC,"17,250"
+32,Lada Niva 2022,Automatic,1700 CC,"17,500"
+33,Hyundai Accent HCI 2020,Automatic / Full option,1600 CC,"17,500"
+34,Senova X25 2019,Automatic,1500 CC,"17,500"
+35,Baic X35 2023,Automatic / AT,1500 CC,"17,900"
+36,Honda City 2021,Automatic / DX,1500 CC,"17,900"
+37,Renault Sandero Step Way 2022,Automatic / B2,1600 CC,"18,000"
+38,Lada Granta 2022,Automatic / Liftback,1600 CC,"18,000"
+39,GAC GS3 2024,Automatic / GS,1500 CC,"18,400"
+40,Dongfeng A30 2023,Automatic / E2,1500 CC,"18,500"
+41,Peugeot 208 2019,Automatic,1600 CC,"18,500"
+42,Ford EcoSport 2021,Automatic / Trend,1500 CC,"18,900"
+43,Renault Zoe 2021,Automatic,0 CC,"18,900"
+44,Hyundai Elantra AD 2020,Automatic / Basic,1600 CC,"19,000"
+45,Hyundai Accent 2023,Automatic,1400 CC,"19,000"
+46,Kia Rio 2022,Automatic / MPI,1600 CC,"19,000"
+47,Toyota Yaris 2023,Automatic,1500 CC,"19,500"
+48,Opel Astra 2021,Automatic,"1400 CC
+Turbo","19,500"
+49,Kia Cerato 2023,Automatic,1600 CC,"19,750"
+50,Nissan Sunny 2022 Facelift,Automatic / S,1600 CC,"19,900"
+51,Jac J7 2023,Automatic,"1500 CC
+Turbo","19,900"
+52,Renault Megane 2021,Automatic / basic,1600 CC,"19,900"
+53,Mitsubishi Xpander 2024,Automatic,1500 CC,"20,500"
+54,Kia Sonet 2023,Automatic,1500 CC,"20,750"
+55,Jac JS4 2023,Automatic,"1500 CC
+Turbo","20,900"
+56,Nissan Kicks 2022,Automatic / S,1600 CC,"20,900"
+57,Chevrolet Groove 2023,Automatic / LT,1500 CC,"20,950"
+58,Changan CS 35 2022,Automatic / PLUS,"1400 CC
+Turbo","21,000"
+59,Dongfeng S60 2023,Automatic,0 CC,"21,500"
+60,GAC GS5 2022,Automatic,"1500 CC
+Turbo","21,900"
+61,Honda JAZZ 2022,Automatic / Comfort,1500 CC,"21,900"
+62,Nissan Sunny 2022 Facelift,Automatic / SL,1600 CC,"21,900"
+63,Changan Eado plus 2023,Automatic,"1400 CC
+Turbo","21,900"
+64,Mitsubishi ASX 2023,Automatic / 2WD,2000 CC,"21,950"
+65,Hyundai Creta 2022,Automatic / Fleet,1500 CC,"22,000"
+66,Dongfeng E70 PRO 2023,Automatic / Electric,0 CC,"22,000"
+67,MG GT 2023,Automatic / DEL,"1500 CC
+Turbo","22,500"
+68,Honda Civic 2020,Automatic / Mid,1600 CC,"22,500"
+69,Chevrolet Groove 2023,Automatic / Premier,1500 CC,"22,750"
+70,Nissan Kicks 2022,Automatic / SV,1600 CC,"22,900"
+71,Mazda 3 2024,Automatic / Mild-HYBRID,1600 CC,"22,900"
+72,MG One 2023,Automatic / STD,"1500 CC
+Turbo","22,900"
+73,Bestune E05 2023,Automatic / Electric,0 CC,"22,900"
+74,Changan CS 35 Plus 2023,Automatic,"2000 CC
+Turbo","22,900"
+75,Baic EU5 Plus 2024,Automatic / Electric,0 CC,"22,900"
+76,Geely Cool Ray 2022,manual,"1500 CC
+Turbo","23,000"
+77,Hyundai Elantra 2023,Automatic,1600 CC,"23,500"
+78,Byd Qin Pro 2022,Automatic / Qin Pro,1500 CC,"23,500"
+79,MG GT 2023,Automatic / COM,"1500 CC
+Turbo","23,500"
+80,Haval Jolion 2022,Automatic / Top,"1500 CC
+Turbo","23,500"
+81,MG 6 2022,Automatic / COM,"1500 CC
+Turbo","23,500"
+82,Nissan LEAF 2020,Automatic / 40kWh,0 CC,"23,500"
+83,GAC Aion 2023,Automatic / Y,0 CC,"23,750"
+84,Opel Corsa E 2024,Automatic,0 CC,"23,900"
+85,Dongfeng A60 2023,Automatic / Max Hybrid,"1500 CC
+Turbo","24,000"
+86,Hyundai Ioniq 2021,Automatic / Hybrid,1600 CC,"24,500"
+87,MG 6 2022,Automatic / Trophy,"1500 CC
+Turbo","24,500"
+88,Suzuki Jimny 2022,Automatic,1500 CC,"24,500"
+89,Chevrolet Malibu 2020,Automatic / LS,"1500 CC
+Turbo","24,900"
+90,Baic X55 2023,Automatic,"1500 CC
+Turbo","24,900"
+91,Chevrolet Captiva 2023,Automatic / LS,"1500 CC
+Turbo","25,000"
+92,Nissan Navara 2022,manual / CSF 4WD 6MT,2500 CC,"25,000"
+93,Honda HRV 2021,Automatic / basic,1800 CC,"25,000"
+94,Bestune B70S 2023,Automatic,"1500 CC
+Turbo","25,500"
+95,MG MG 4 2023,Automatic / EV LUX,0 CC,"25,500"
+96,Kia Seltos 2023,Automatic / MPI,1600 CC,"25,500"
+97,GAC GS5 2022,Automatic / Full option,"1500 CC
+Turbo","25,900"
+98,Nissan Kicks 2022,Automatic / SL,1600 CC,"25,900"
+99,Mazda CX 30 2024,Automatic / Mild-HYBRID,2000 CC,"25,900"
+100,Mazda CX 30 2024,Automatic / Mild-HYBRID,2000 CC,"25,900"
+101,Toyota C-HR 2022,Automatic,1800 CC,"25,900"
+102,GAC GS5 2022,Automatic / Full option,"1500 CC
+Turbo","25,900"
+103,Nissan Kicks 2022,Automatic / SL,1600 CC,"25,900"
+104,Mitsubishi Outlander 2022,Automatic / Low,2400 CC,"25,950"
+105,Chevrolet Captiva 2024,Automatic,"1500 CC
+Turbo","25,950"
+106,Dongfeng T5 Evo 2023,Automatic / SPORT,"1500 CC
+Turbo","26,000"
+107,Bestune B70 2023,Automatic,"1500 CC
+Turbo","26,500"
+108,MG Rx5 2023,Automatic / STD Plus,"1500 CC
+Turbo","26,500"
+109,Peugeot E-2008 2023,Automatic / Active,0 CC,"26,500"
+110,Chevrolet Captiva 2023,Automatic / LT,"1500 CC
+Turbo","26,500"
+111,MG One 2023,Automatic / Comfort,"1500 CC
+Turbo","26,500"
+112,Toyota Corolla Cross 2022,Automatic,1800 CC,"26,750"
+113,Dongfeng AX7 Mach 2023,Automatic / PLUS,"1500 CC
+Turbo","26,800"
+114,MG ZS EV 2023,Automatic,1500 CC,"26,900"
+115,Chevrolet Bolt 2019,Automatic / LT,0 CC,"26,900"
+116,Kia Sportage 2023,Automatic,1600 CC,"27,000"
+117,Peugeot 508 2019,Automatic / GT Line,1600 CC,"27,200"
+118,Renault Duster 2021,Automatic / Full Option,2000 CC,"27,500"
+119,Haval Ora 2023,Automatic,0 CC,"27,500"
+120,Hyundai Kona 2023,Automatic,0 CC,"27,500"
+121,Geely Azkarra 2022,Automatic,"1500 CC
+Turbo","27,900"
+122,Mazda CX 30 2021,Automatic,2000 CC,"27,900"
+123,Toyota C-HR 2022,Automatic / GX Hybrid,1800 CC,"27,900"
+124,Bestune T77 Pro 2022,Automatic / Premium,"1500 CC
+Turbo","27,900"
+125,MG Rx5 2023,Automatic / COM Plus,"1500 CC
+Turbo","28,500"
+126,Dongfeng T5 HEV 2024,Automatic,1500 CC,"28,500"
+127,Chevrolet Captiva 2023,Automatic / premier,"1500 CC
+Turbo","28,500"
+128,Peugeot E-2008 2023,Automatic / Allure,0 CC,"28,500"
+129,Toyota Corolla Cross 2022,Automatic,1800 CC,"28,500"
+130,MG HS 2022,Automatic / COM,"2000 CC
+Turbo","28,500"
+131,Dongfeng Huge 2024,Automatic,"1500 CC
+Turbo","28,750"
+132,Mazda 6 2020,Automatic / Basic,2000 CC,"29,000"
+133,Dongfeng M4 U-Tour 2023,Automatic,"1500 CC
+Turbo","29,000"
+134,Peugeot 3008 2019,Automatic / Allure,1600 CC,"29,000"
+135,MG One 2023,Automatic / Deluxe,"1500 CC
+Turbo","29,000"
+136,Hyundai Tucson GDI 2020,Automatic / Full Option,2000 CC,"29,500"
+137,Ford Fusion 2019,Automatic / SE,2500 CC,"29,500"
+138,Opel Grandland 2021,Automatic,"1600 CC
+Turbo","29,900"
+139,Geely Okavango 2022,Automatic / Mild-HYBRID,"1500 CC
+Turbo","29,900"
+140,Baic X7 2023,Automatic,"1500 CC
+Turbo","29,900"
+141,Ford Escape 2020,Automatic,2000 CC,"29,900"
+142,Mitsubishi Outlander 2022,Automatic / Mid,2400 CC,"29,950"
+143,Renault Koleos 2021,Automatic / GM2,2500 CC,"29,999"
+144,Changan CS75 2022,Automatic / plus,"2000 CC
+Turbo","29,999"
+145,Mitsubishi L 200 2023,Automatic / Sportero,"2400 CC
+Turbo","30,000"
+146,Hyundai Sonata 2022,Automatic,2500 CC,"30,000"
+147,Toyota Camry 2022,Automatic,2500 CC,"30,000"
+148,Peugeot E-2008 2023,Automatic / GT,0 CC,"30,400"
+149,MG Rx5 2023,Automatic / DEL Plus,"1500 CC
+Turbo","30,500"
+150,Mazda CX 5 2024,Automatic,2500 CC,"30,900"
+151,Kia Niro 2023,Automatic,1600 CC,"31,000"
+152,Changan UNI-T 2023,Automatic /,"1500 CC
+Turbo","31,500"
+153,Honda Accord 2021,Automatic / LX,1500 CC,"31,900"
+154,Mitsubishi Eclipse Cross 2020,Automatic,"1500 CC
+Turbo","31,950"
+155,Mitsubishi Outlander 2022,Automatic / High,2400 CC,"31,950"
+156,Kia K5 2023,Automatic,2500 CC,"32,000"
+157,Kia Sportage 2023,Automatic,1600 CC,"32,500"
+158,MG HS 2022,Automatic / LUX,"2000 CC
+Turbo","33,000"
+159,Audi A3 2019,Automatic / TFSI,1000 CC,"33,728"
+160,Changan CS75 Plus 2023,Automatic /,"2000 CC
+Turbo","33,900"
+161,Changan CS 85 2022,Automatic / COPE,"2000 CC
+Turbo","34,000"
+162,MG RX8 2022,Automatic / STD AWD,"2000 CC
+Turbo","34,000"
+163,Peugeot 5008 2019,Automatic / Allure,1600 CC,"34,000"
+164,Honda Accord 2021,Automatic / EX-L,1500 CC,"34,900"
+165,Nissan Xterra 2022,Automatic / SE 2WD,2500 CC,"34,900"
+166,GAC GS8 2023,Automatic / GL,"2000 CC
+Turbo","34,900"
+167,Nissan XTrail 2023,Automatic / S,2500 CC,"34,900"
+168,Hyundai Tucson 2023,Automatic / Hybrid,"1600 CC
+Turbo","35,500"
+169,Volkswagen Tiguan 2023,Automatic,1400 CC,"35,700"
+170,Changan CS 85 2022,Automatic / GDI sport,"2000 CC
+Turbo","35,999"
+171,Haval Dargo 2022,Automatic / Adventure 4WD,"2000 CC
+Turbo","36,000"
+172,Toyota Camry 2022,Automatic,2500 CC,"36,750"
+173,Chevrolet Bolt 2023,Automatic / Electric,0 CC,"36,900"
+174,MG RX8 2022,Automatic / COM,"2000 CC
+Turbo","37,000"
+175,Honda CRV 2022,Automatic / MID,2000 CC,"37,500"
+176,Kia Optima 2022,Automatic / hybrid 2,2000 CC,"37,500"
+177,Baic BJ40 2022,Automatic / S off-Road,"2300 CC
+Turbo","37,900"
+178,Bestune T99 2023,Automatic,"2000 CC
+Turbo","37,900"
+179,Volvo XC 40 2021,Automatic / T5 FWD Momentum,"2000 CC
+Turbo","38,000"
+180,Toyota Camry 2022,Automatic,2500 CC,"38,900"
+181,Porsche Macan 2023,Automatic / Base,2000 CC,"39,000"
+182,Lexus UX 2020,Automatic,2000 CC,"39,000"
+183,Changan CS 95 2022,Automatic,2000 CC,"39,000"
+184,Haval H9 2022,Automatic / Dignity,2000 CC,"39,800"
+185,Baic BJ40 Plus 2023,Automatic,"2300 CC
+Turbo","39,900"
+186,Honda CRV 2022,Automatic / TOP,2000 CC,"39,900"
+187,Nissan Xterra 2022,Automatic / Titanium 2WD,2500 CC,"39,900"
+188,Jeep Gladiator 2023,Automatic / Sport,3600 CC,"39,900"
+189,Hyundai Santa Fe 2023,Automatic,2500 CC,"40,000"
+190,Nissan Pathfinder 2020,Automatic / S 4wd,2500 CC,"40,950"
+191,MG RX8 2022,Automatic / LUX,"2000 CC
+Turbo","41,000"
+192,Porsche Macan 2023,Automatic / T,2000 CC,"41,000"
+193,Mazda CX-9 2024,Automatic,2500 CC,"41,900"
+194,Toyota Highlander 2022,Automatic / LE HEV,2500 CC,"42,000"
+195,Mitsubishi Pajero 2022,Automatic,3800 CC,"42,950"
+196,Porsche Macan 2023,Automatic / S,3000 CC,"43,000"
+197,Ford Edge 2021,Automatic,2000 CC,"43,000"
+198,MG RX8 2022,Automatic / Black,"2000 CC
+Turbo","43,500"
+199,Lexus Es 2021,Automatic / AWD,2500 CC,"44,225"
+200,Toyota Highlander 2022,Automatic / GLE HEV 4X4,2500 CC,"44,500"
+201,Mazda CX-9 2021,Automatic / GS,"2500 CC
+Turbo","45,000"
+202,Infiniti Q50 2019,Automatic / RED SPORT,3000 CC,"45,000"
+203,Infiniti QX50 2020,Automatic,2000 CC,"45,000"
+204,Kia Sorento 2023,Automatic / Hybrid,1600 CC,"45,000"
+205,Mercedes C 200 2019,Automatic / Hybrid,1500 CC,"45,000"
+206,Mitsubishi Montero 2023,Automatic,3000 CC,"45,000"
+207,Porsche 718 2023,Automatic / Cayman,2000 CC,"45,000"
+208,Byd Tang 2022,Automatic / Comfort,"2000 CC
+Turbo","45,000"
+209,Volvo XC60 2019,Automatic,"2000 CC
+Turbo","45,900"
+210,Audi A4 2021,Automatic / TFSI Basic,"1400 CC
+Turbo","46,000"
+211,Alfa Romeo Giulia 2022,Automatic / Veloce,2000 CC,"46,899"
+212,Hyundai Santa Fe 2023,Automatic / Premium,3500 CC,"47,000"
+213,Kia Telluride 2021,Automatic / Full Option,3800 CC,"47,400"
+214,Gmc Terrain 2023,Automatic,"1500 CC
+Turbo","47,500"
+215,Gmc Acadia 2023,Automatic / SLE,3600 CC,"47,900"
+216,Porsche 718 2023,Automatic / Boxster,2000 CC,"48,000"
+217,Volkswagen Teramont 2023,Automatic / Trendline AWD,"2000 CC
+Turbo","48,900"
+218,Mazda CX-9 2021,Automatic / GT,"2500 CC
+Turbo","49,000"
+219,Toyota Corona 2023,Automatic,"2400 CC
+Turbo","49,500"
+220,Volvo S90 2020,Automatic / T8 Plug-in Hybrid AWD,"2000 CC
+Turbo","49,900"
+221,Tank 300 2023,Automatic,2000 CC,"50,000"
+222,Porsche 718 2023,Automatic / Cayman S,2500 CC,"50,000"
+223,Porsche 718 2023,Automatic / Cayman Style Edition,2000 CC,"50,000"
+224,Subaru WRX 2022,Automatic / Premium,2000 CC,"50,000"
+225,Ford Expedition 2019,Automatic / XT,3500 CC,"51,000"
+226,Porsche Macan 2023,Automatic / GTS,2900 CC,"51,000"
+227,Lexus NX 2020,Automatic,2000 CC,"51,000"
+228,Porsche 718 2023,manual / Boxster Style Edition,2000 CC,"52,000"
+229,Porsche 718 2023,Automatic / Boxster S,2500 CC,"52,000"
+230,Toyota Highlander 2022,Automatic / LTD HEV 4X4,2500 CC,"52,900"
+231,Chevrolet Traverse 2023,Automatic / LS AWD,3600 CC,"53,500"
+232,Jeep Gladiator 2023,Automatic / Overland,3600 CC,"54,000"
+233,Kia EV6 2023,Automatic,0 CC,"55,000"
+234,Dodge Challenger 2020,Automatic / GT,3600 CC,"55,000"
+235,Infiniti QX55 2022,Automatic / LUXE,"2000 CC
+Turbo","55,000"
+236,Volvo XC90 2019,Automatic / T5,"2000 CC
+Turbo","55,000"
+237,Audi Q5 2019,Automatic / TFSI Basic,2000 CC,"55,284"
+238,Audi A5 2019,Automatic / TFSI quattro Design,2000 CC,"56,000"
+239,Audi A5 2023,Automatic / Sportback,2000 CC,"56,000"
+240,Lexus GX 2021,Automatic / PREMIUM,4600 CC,"56,135"
+241,Cadillac XT4 2023,Automatic,"2000 CC
+Turbo","57,000"
+242,Jaguar E-pace 2022,Automatic / S 200 PS,"2000 CC
+Turbo","57,910"
+243,Land Rover Range Rover Evoque 2022,Automatic / PS AWD,"2000 CC
+Turbo","57,960"
+244,Jaguar XE 2021,Automatic / S 250 PS,"2000 CC
+Turbo","58,530"
+245,Lexus Gs 2020,Automatic / SPORT,3500 CC,"58,646"
+246,Porsche 718 2023,manual / Cayman GTS,4000 CC,"59,000"
+247,BMW 330 2022,Automatic,2000 CC,"59,000"
+248,Porsche Cayenne 2023,Automatic / Base,3000 CC,"59,000"
+249,Gmc Acadia 2023,Automatic / AT4,3600 CC,"59,900"
+250,BMW X3 2021,Automatic / Hybrid,2000 CC,"60,000"
+251,BMW 5 Series 2000,Automatic / 530i M Sport,4 CC,"60,000"
+252,Jeep Grand Cherokee 2023,Automatic / Altitude,3600 CC,"60,000"
+253,BMW 5 Series 2023,Automatic / 530i M Sport,2000 CC,"60,000"
+254,Mercedes E 200 2021,A/T / AVANTGARDE,"2000 CC
+Turbo","62,000"
+255,Jeep Wrangler Unlimited 2022,Automatic / Sport,3600 CC,"62,000"
+256,Porsche Cayenne 2022,Automatic / Platinum Edition,3600 CC,"62,000"
+257,Porsche 718 2023,manual / Boxster GTS,4000 CC,"62,000"
+258,Jaguar F-Pace 2022,Automatic / S 250 PS,"2000 CC
+Turbo","63,720"
+259,BMW X4 2021,Automatic / xDrive 30i,2000 CC,"65,000"
+260,Ford Explorer 2022,Automatic / XLT AWD Full,3500 CC,"65,000"
+261,Jeep Gladiator 2023,Automatic / Rubicon,3600 CC,"66,000"
+262,Jaguar XF 2021,Automatic / S,2000 CC,"66,490"
+263,Mercedes GLS 2021,Automatic,3000 CC,"67,000"
+264,Porsche Cayenne 2023,Automatic / S,2900 CC,"67,000"
+265,Land Rover Velar 2022,Automatic / Base 250 PS,2000 CC,"67,360"
+266,Lexus GX 2021,Automatic / LUXURY,4600 CC,"67,700"
+267,Chevrolet Blazer 2023,Automatic,3600 CC,"67,900"
+268,Cadillac XT6 2023,Automatic,3600 CC,"68,000"
+269,Mercedes E 200 2021,A/T / AMG Coupé,"2000 CC
+Turbo","68,000"
+270,Porsche 718 2023,manual / Spyder,4000 CC,"68,000"
+271,Jeep Grand Cherokee 2023,Automatic / Limited,3600 CC,"69,000"
+272,Porsche Taycan 2023,Automatic / Base,0 CC,"69,000"
+273,Porsche Cayenne 2023,Automatic / E-Hybrid,3000 CC,"69,000"
+274,Porsche 718 2023,manual / Cayman GT4,4000 CC,"69,000"
+275,Audi A7 2019,Automatic / TFSI,2000 CC,"69,000"
+276,Land Rover Defender 2022,Automatic / 90 SE P300,2000 CC,"69,210"
+277,Volvo XC90 2019,Automatic / T8 Plug-in Hybrid AWD,"2000 CC
+Turbo","69,900"
+278,Gmc Acadia 2023,Automatic / denali,3600 CC,"69,900"
+279,Jeep Wrangler Unlimited 2022,Automatic / Sahara,3600 CC,"70,000"
+280,Mercedes E Class 2021,Automatic,2000 CC,"70,000"
+281,Toyota Prado 2022,Automatic / VX,4000 CC,"70,000"
+282,Ford Explorer 2022,Automatic / Limited V6 Hybrid AWD,3300 CC,"72,000"
+283,Mercedes E 200 2021,A/T / AMG Cabrio,"2000 CC
+Turbo","72,000"
+284,Mercedes E Class 2021,Automatic,2000 CC,"73,000"
+285,Jeep Wrangler 2023,Automatic,3600 CC,"73,000"
+286,Mercedes GLS 2021,Automatic,3000 CC,"73,000"
+287,BMW 430 2022,Automatic,2000 CC,"75,000"
+288,Porsche Panamera 2022,Automatic / Base,3000 CC,"75,000"
+289,BMW Z4 2022,Automatic / sDrive30i,2000 CC,"75,000"
+290,Land Rover Discovery 2022,Automatic / R-Dynamic HSE,3000 CC,"75,870"
+291,Lexus Rx 2022,Automatic / 450h F Sport,3500 CC,"76,000"
+292,BMW 430 2022,Automatic / Convertible,2000 CC,"76,000"
+293,Jeep Wrangler Unlimited 2022,Automatic / Rubicon X,3600 CC,"76,000"
+294,Tesla Model S 2020,Automatic,0 CC,"76,990"
+295,Porsche Taycan Cross Turismo 2023,Automatic / 4,0 CC,"77,000"
+296,Nissan Patrol 2023,Automatic,4000 CC,"78,000"
+297,Kia Sonet 2023,Automatic,1500 CC,"78,773"
+298,Porsche 911 2023,Automatic / Carrera,3000 CC,"79,000"
+299,Gmc Sierra 2022,Automatic / DENALI,6200 CC,"79,900"
+300,Jaguar I-pace 2023,Automatic / S,0 CC,"80,110"
+301,Audi Q7 2019,Automatic / TFSI CS quattro,2000 CC,"80,969"
+302,Volkswagen Touareg 2022,Automatic / TL,"3000 CC
+Turbo","81,000"
+303,Tesla Model X 2020,Automatic / Performance,0 CC,"81,990"
+304,Porsche Taycan 2023,Automatic / 4S,0 CC,"82,000"
+305,Chevrolet Tahoe 2023,Automatic / LS,5300 CC,"82,000"
+306,Jaguar F-Type 2023,Automatic / R-DYNAMIC,"2000 CC
+Turbo","82,560"
+307,Porsche Taycan Cross Turismo 2023,Automatic / 4S,0 CC,"83,000"
+308,Toyota Land Cruiser 2022,Automatic,4000 CC,"85,000"
+309,BMW X5 2022,Automatic / 40i,3000 CC,"85,000"
+310,Porsche 911 2023,Automatic / Carrera 4,3000 CC,"85,000"
+311,Gmc Yukon 2023,Automatic / SLE,5300 CC,"86,000"
+312,Porsche 911 2023,Automatic / Carrera T,3000 CC,"87,000"
+313,Porsche 911 2023,Automatic / Carrera Cabriolet,3000 CC,"88,000"
+314,Porsche Panamera 2022,Automatic / 4 E-Hybrid,2900 CC,"88,000"
+315,Volkswagen T-Roc 2023,Automatic / TSI Life,1400 CC,"89,900"
+316,Lexus Ls 2020,Automatic,3500 CC,"90,755"
+317,Infiniti QX80 2020,Automatic,5600 CC,"93,000"
+318,Porsche 911 2023,Automatic / Carrera 4 Cabriolet,3000 CC,"93,000"
+319,Porsche 911 2023,manual / Targa 4,3400 CC,"93,000"
+320,Porsche 911 2023,Automatic / Carrera S,3000 CC,"93,000"
+321,Porsche Taycan 2023,Automatic / GTS,0 CC,"95,000"
+322,Lexus Lx 2021,Automatic,5700 CC,"95,880"
+323,Porsche Panamera 2022,Automatic / 4 E-Hybrid Executive,2900 CC,"96,000"
+324,Toyota Land Cruiser 2022,Automatic / GXR,"3500 CC
+Turbo","96,000"
+325,Audi Q8 2019,Automatic / TFSI,3000 CC,"96,464"
+326,Porsche 911 2023,Automatic / Carrera 4S,3000 CC,"98,000"
+327,Porsche 911 2023,Automatic / Carrera S Cabriolet,3000 CC,"101,000"
+328,Porsche 911 2023,Automatic / Carrera GTS,3000 CC,"102,000"
+329,Porsche 718 2023,Automatic / Cayman GT4 RS,4000 CC,"103,000"
+330,Porsche 911 2023,Automatic / Carrera 4S Cabriolet,3000 CC,"106,000"
+331,Porsche 911 2023,manual / Targa 4S,3800 CC,"106,000"
+332,Porsche 911 2023,Automatic / Carrera 4 GTS,3000 CC,"107,000"
+333,Jaguar XJ 2020,Automatic / LUXURY,3000 CC,"109,740"
+334,Maserati Ghibli 2022,Automatic v 6,"3000 CC
+Turbo","110,000"
+335,Infiniti QX80 2021,Automatic,5600 CC,"110,000"
+336,Toyota Land Cruiser 2022,Automatic / GXR plus,"3500 CC
+Turbo","110,000"
+337,Gmc Yukon 2023,Automatic / AT4 AWD,5300 CC,"110,000"
+338,Audi A8 2019,Automatic / TFSI quattro Base,3000 CC,"111,128"
+339,Porsche 911 2023,Automatic / Carrera GTS Cabriolet,3000 CC,"112,000"
+340,Porsche Taycan 2023,Automatic / Turbo,0 CC,"115,000"
+341,Porsche Taycan Cross Turismo 2023,Automatic / Turbo,0 CC,"116,000"
+342,Porsche 911 2023,Automatic / Carrera 4 GTS Cabriolet,3000 CC,"117,000"
+343,Porsche 911 2023,Automatic / Targa 4 GTS,3000 CC,"117,000"
+344,Maserati Levante 2022,Automatic V6 Modena,"3000 CC
+Turbo","119,000"
+345,Porsche 911 2023,manual / GT3,3800 CC,"124,000"
+346,Toyota Land Cruiser 2022,Automatic / VX,"3500 CC
+Turbo","125,000"
+347,Porsche 911 2023,manual / Turbo,"3800 CC
+Turbo","131,000"
+348,Porsche 911 2023,Automatic / Turbo Cabriolet,"3800 CC
+Turbo","139,000"
+349,Porsche Taycan 2023,Automatic / Turbo S,0 CC,"147,000"
+350,Maserati Quattroporte 2022,Automatic Gt,"3000 CC
+Turbo","147,000"
+351,BMW X7 2022,Automatic / XDrive40i,3000 CC,"155,000"
+352,Porsche 911 2023,Automatic / Turbo S,"3800 CC
+Turbo","155,000"
+353,BMW 840i 2022,Automatic / Series Gran Coupe,3000 CC,"155,000"
+354,Porsche 911 2023,manual / Turbo S Cabriolet,"3800 CC
+Turbo","163,000"
+355,Cadillac Escalade 2023,Automatic,6200 CC,"165,800"
+356,Land Rover Range Rover Sport 2022,Automatic / SE 300 PS,2000 CC,"166,720"
+357,Maserati Levante 2022,Automatic / GTS,"3800 CC
+Turbo","175,000"
+358,Land Rover Range Rover 2023,Automatic / SE,3000 CC,"187,350"
+359,Genesis GV70 2022,Automatic / Prestige,"2500 CC
+Turbo","191,500"
+360,Genesis G80 2022,Automatic / Sport RWD,"2500 CC
+Turbo","201,500"
+361,Land Rover Range Rover 2023,Automatic / HSE,3000 CC,"203,350"
+362,Maserati Quattroporte 2022,Automatic / GTS GranLusso,"3800 CC
+Turbo","210,000"
+363,Maserati Levante 2022,Automatic / Trofeo,"3800 CC
+Turbo","220,000"
+364,Genesis GV80 2022,Automatic / Prestige,"2500 CC
+Turbo","239,500"
+365,Cadillac Ecalade V 2023,manual,6200 CC,"250,000"

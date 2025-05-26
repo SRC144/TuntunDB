@@ -4,6 +4,7 @@ from ..commands.insert import InsertCommand
 from ..commands.select import SelectCommand
 from ..commands.delete import DeleteCommand
 from ..commands.update import UpdateCommand
+from ..commands.drop import DropCommand
 from ..storage_management.table_manager import TableManager
 
 class QueryRunner:
@@ -15,7 +16,8 @@ class QueryRunner:
             'INSERT': InsertCommand(table_manager),
             'SELECT': SelectCommand(table_manager),
             'DELETE': DeleteCommand(table_manager),
-            'UPDATE': UpdateCommand(table_manager)
+            'UPDATE': UpdateCommand(table_manager),
+            'DROP': DropCommand(table_manager)
         }
     
     def execute(self, parsed_query: Dict[str, Any]) -> Dict[str, Any]:

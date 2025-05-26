@@ -1,20 +1,20 @@
-from typing import Dict, Any, List
+from typing import Dict, Any
 import struct
 import os
 import time
 from ..cursors.line_cursor import LineCursor
+from ..storage_management.table_manager import TableManager
 from ..index_handling.index_factory import IndexFactory
 import logging
 
 logger = logging.getLogger(__name__)
 
 class TableCompactor:
-    def __init__(self, table_manager):
+    def __init__(self, table_manager: TableManager):
         self.table_manager = table_manager
 
     def compact_table(self, table_name: str) -> Dict[str, Any]:
         """Compact a table by removing deleted records and rebuilding indexes"""
-        logger.debug(f"Starting table compaction for {table_name}")
         
         table_info = self.table_manager.get_table_info(table_name)
         if not table_info:
@@ -77,17 +77,14 @@ class TableCompactor:
                 )
                 
                 # Rebuild index
-                with open(temp_data_file, 'rb') as f:
-                    pos = 0
-                    while True:
-                        record = f.read(record_size)
-                        if not record or len(record) < record_size:
-                            break
-                            
+                with LineCursor(temp_data_file, record_size) as cursor:
+                    while not cursor.eof():
+                        record = cursor.read_record()
                         values = struct.unpack(table_info["format_str"], record)
+                        print(values)
                         key = values[col_idx + 1]  # +1 to skip deletion marker
-                        new_index.insert(key, pos)
-                        pos += record_size
+                        new_index.add(key)
+                        cursor.advance_record()
 
             # Update table info
             table_info["stats"]["total_records"] = new_record_count
@@ -102,7 +99,6 @@ class TableCompactor:
             # Save updated table info
             self.table_manager._save_table_info(table_name, table_info)
             
-            logger.debug(f"Successfully compacted table {table_name}")
             return {
                 "status": "success",
                 "message": f"Table compacted: {new_record_count} records retained"

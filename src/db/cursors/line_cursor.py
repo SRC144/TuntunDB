@@ -8,7 +8,6 @@ class LineCursor:
         self.filename = filename
         self.record_size = record_size
         self.file = None
-        print(f"[DEBUG] LineCursor: Initialized with file {filename} and record size {record_size}")
         self.position = 0  # current record number (0-based)
         
         if os.path.exists(filename):
@@ -23,14 +22,12 @@ class LineCursor:
             
         # Calculate the correct position in bytes
         byte_position = self.position * self.record_size
-        print(f"[DEBUG] LineCursor: Reading from byte position {byte_position}")
         
         # Seek to the correct position
         self.file.seek(byte_position)
         
         # Read the record
         data = self.file.read(self.record_size)
-        print(f"[DEBUG] LineCursor: Read record of size {len(data)}")
         
         if len(data) < self.record_size:
             return None
@@ -49,7 +46,6 @@ class LineCursor:
         # Update the current position
         self.position = record_number
         byte_position = self.position * self.record_size
-        print(f"[DEBUG] LineCursor: Moving to record {record_number} at byte position {byte_position}")
         
         # Seek to the position
         self.file.seek(byte_position)
@@ -97,14 +93,12 @@ class LineCursor:
 
     def close(self):
         """Close the file."""
-        print(f"[DEBUG] LineCursor: Closing file {self.filename}")
         if self.file:
             self.file.close()
             self.file = None
 
     def __enter__(self):
         """Open file for reading and writing"""
-        print(f"[DEBUG] LineCursor: Opening file {self.filename}")
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -120,7 +114,6 @@ class LineCursor:
         size = self.file.tell()
         self.file.seek(current)  # Restore position
         total = size // self.record_size
-        print(f"[DEBUG] LineCursor: Total records: {total}")
         return total
 
     def read_at(self, record_number: int) -> bytes:

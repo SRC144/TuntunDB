@@ -1,6 +1,6 @@
-sqlglot==19.0.3  # SQL parsing library 
+sqlglot==19.0.3  # SQL parsing library
 numpy>=1.24.0
-pymorton>=1.0.0  # Z-order curve encoding 
+pymorton>=1.0.0  # Z-order curve encoding
 flask==3.0.2
 werkzeug==3.0.1
-flask-cors==4.0.0 
+flask-cors==4.0.0

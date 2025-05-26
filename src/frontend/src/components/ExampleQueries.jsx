@@ -1,82 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
-function TableList({ onTableClick, refreshTrigger }) {
-  const [tables, setTables] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+function ExampleQueries({ queries, onQueryClick }) {
   const [currentPage, setCurrentPage] = useState(1);
-  const tablesPerPage = 5;
-
-  useEffect(() => {
-    fetchTables();
-  }, [refreshTrigger]);
-
-  const fetchTables = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/api/tables');
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Error al obtener las tablas');
-      }
-
-      setTables(data.tables || []);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="animate-pulse bg-white rounded-lg shadow p-4">
-        <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
-        <div className="space-y-3">
-          <div className="h-3 bg-gray-200 rounded"></div>
-          <div className="h-3 bg-gray-200 rounded"></div>
-          <div className="h-3 bg-gray-200 rounded"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-red-50 rounded-lg shadow p-4">
-        <p className="text-sm text-red-800">{error}</p>
-      </div>
-    );
-  }
-
-  const totalPages = Math.ceil(tables.length / tablesPerPage);
-  const startIndex = (currentPage - 1) * tablesPerPage;
-  const endIndex = Math.min(startIndex + tablesPerPage, tables.length);
-  const currentTables = tables.slice(startIndex, endIndex);
+  const queriesPerPage = 5;
+  const totalPages = Math.ceil(queries.length / queriesPerPage);
+  
+  const startIndex = (currentPage - 1) * queriesPerPage;
+  const endIndex = Math.min(startIndex + queriesPerPage, queries.length);
+  const currentQueries = queries.slice(startIndex, endIndex);
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <div className="px-4 py-3 border-b border-gray-200">
-        <h3 className="text-lg font-medium text-gray-900">Tablas Disponibles</h3>
+        <h3 className="text-lg font-medium text-gray-900">Consultas de Ejemplo</h3>
       </div>
       <div className="divide-y divide-gray-200">
-        {tables.length === 0 ? (
-          <div className="px-4 py-3 text-sm text-gray-500">
-            No existen tablas disponibles. Cree una usando CREATE TABLE.
-          </div>
-        ) : (
-          currentTables.map((tableName, index) => (
-            <button
-              key={startIndex + index}
-              onClick={() => onTableClick(tableName)}
-              className="w-full px-4 py-3 text-left hover:bg-gray-50 focus:outline-none focus:bg-gray-50 transition duration-150 ease-in-out"
-            >
-              <div className="text-sm font-medium text-gray-900">{tableName}</div>
-            </button>
-          ))
-        )}
+        {currentQueries.map((query, index) => (
+          <button
+            key={startIndex + index}
+            onClick={() => onQueryClick(query)}
+            className="w-full px-4 py-3 text-left hover:bg-gray-50 focus:outline-none focus:bg-gray-50 transition duration-150 ease-in-out"
+          >
+            <div className="text-sm font-mono text-gray-900">
+              {query.split('\n')[0].replace(/\s+/g, ' ').trim()}
+            </div>
+          </button>
+        ))}
       </div>
-
+      
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
@@ -168,4 +119,4 @@ function TableList({ onTableClick, refreshTrigger }) {
   );
 }
 
-export default TableList; 
+export default ExampleQueries; 

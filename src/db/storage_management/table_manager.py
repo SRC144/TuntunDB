@@ -37,14 +37,10 @@ class TableManager:
             return json.load(f)
     
     def create_table(self, table_name: str, columns: List[Dict], indexes: Dict = None, primary_key: str = None) -> Dict:
-        """Create a new table with the specified columns and indexes"""
-        print(f"[DEBUG] Starting create_table for {table_name}")
-        
         # Convert table name to lowercase
         table_name = table_name.lower()
         
         if self.table_exists(table_name):
-            print(f"[DEBUG] Table {table_name} already exists, returning error")
             return {
                 "status": "error",
                 "message": f"Table {table_name} already exists"
@@ -102,7 +98,6 @@ class TableManager:
             return table_info
             
         except Exception as e:
-            print(f"[DEBUG] Error in create_table: {str(e)}")
             return {
                 "status": "error",
                 "message": f"Failed to create table: {str(e)}"

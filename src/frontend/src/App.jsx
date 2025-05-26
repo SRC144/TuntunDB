@@ -3,6 +3,7 @@ import { ArrowPathIcon, PlayIcon } from '@heroicons/react/24/solid';
 import QueryEditor from './components/QueryEditor';
 import ResultsTable from './components/ResultsTable';
 import TableList from './components/TableList';
+import ExampleQueries from './components/ExampleQueries';
 
 const EXAMPLE_QUERIES = [
   `CREATE TABLE Restaurantes (
@@ -14,7 +15,8 @@ const EXAMPLE_QUERIES = [
   `INSERT INTO Restaurantes VALUES (1, "El Buen Sabor", "2024-01-01", "10.5,20.3");`,
   `INSERT INTO Restaurantes VALUES (2, "La Pizzeria", "2024-01-02", "15.7,25.1");`,
   `SELECT * FROM Restaurantes WHERE nombre BETWEEN "A" AND "M";`,
-  `DELETE FROM Restaurantes WHERE id = 1;`
+  `DELETE FROM Restaurantes WHERE id = 1;`,
+  `DROP TABLE Restaurantes;`
 ];
 
 const API_URL = 'http://localhost:5000/api';
@@ -72,17 +74,22 @@ function App() {
     setQuery(`SELECT * FROM ${tableName};`);
   };
 
+  const handleExampleClick = (query) => {
+    setQuery(query);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Left Sidebar */}
-          <div className="lg:col-span-1">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Left Sidebar - Now wider (4 columns instead of 1) */}
+          <div className="lg:col-span-4 space-y-6">
             <TableList onTableClick={handleTableClick} refreshTrigger={refreshTrigger} />
+            <ExampleQueries queries={EXAMPLE_QUERIES} onQueryClick={handleExampleClick} />
           </div>
 
-          {/* Main Content */}
-          <div className="lg:col-span-3">
+          {/* Main Content - Adjusted to take remaining space */}
+          <div className="lg:col-span-8">
             <div className="bg-white rounded-lg shadow">
               {/* Header */}
               <div className="px-6 py-4 border-b border-gray-200">
@@ -100,22 +107,6 @@ function App() {
                   onExecute={executeQuery}
                   loading={loading}
                 />
-
-                {/* Example Queries */}
-                <div className="mt-4">
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">Ejemplos de consultas:</h3>
-                  <div className="space-y-2">
-                    {EXAMPLE_QUERIES.map((exampleQuery, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setQuery(exampleQuery)}
-                        className="block text-left text-sm text-blue-600 hover:text-blue-800 font-mono"
-                      >
-                        {exampleQuery.split('\n')[0]}...
-                      </button>
-                    ))}
-                  </div>
-                </div>
 
                 {/* Results Section */}
                 <div className="mt-6">

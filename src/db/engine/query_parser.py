@@ -22,6 +22,9 @@ class QueryParser:
                 return self._parse_create_from_file(query)
             return self._parse_create_table(query)
         
+        if query_upper.startswith("DROP TABLE"):
+            return self._parse_drop_table(query)
+            
         # Manejo especial para INSERT con VALUES
         if query_upper.startswith("INSERT"):
             # Limpiar la query eliminando nuevas lineas y espacios extra
@@ -104,35 +107,37 @@ class QueryParser:
         }
     
     def _parse_create_from_file(self, query: str) -> Dict[str, Any]:
-        """Parse CREATE TABLE a partir de archivo con especificacion de indice"""
-        pattern = r'create table (\w+) from file ["\']([^"\']+)["\'] using index (\w+)\(["\']?(\w+)["\']?\)'
-        match = re.search(pattern, query, re.IGNORECASE)
+        """Parse CREATE TABLE from file with index specifications"""
+        # Basic pattern for table name and file path
+        base_pattern = r'create table (\w+) from file ["\']([^"\']+)["\']'
+        base_match = re.search(base_pattern, query, re.IGNORECASE)
         
-        if not match:
+        if not base_match:
             return {"error": "Invalid CREATE TABLE FROM FILE syntax"}
             
-        table_name, file_path, index_type, index_column = match.groups()
+        table_name, file_path = base_match.groups()
         table_name = table_name.lower()  # Convert to lowercase
         
-        # Only proceed if it's a BPlusTree index, otherwise ignore the index
-        if index_type != 'bplus':
-            return {
-                "type": "CREATE",
-                "from_file": True,
-                "table_name": table_name,
-                "file_path": file_path,
-                "index_info": None
-            }
+        # Initialize empty index info
+        index_info = {}
+        
+        # Check for index specifications
+        index_pattern = r'using index (\w+)\(["\']?(\w+)["\']?\)'
+        index_matches = re.finditer(index_pattern, query, re.IGNORECASE)
+        
+        for match in index_matches:
+            index_type, index_column = match.groups()
+            index_type = index_type.lower()
+            if index_type not in [t.lower() for t in self.supported_indexes]:
+                continue  # Skip unsupported index types
+            index_info[index_column] = index_type
             
         return {
             "type": "CREATE",
             "from_file": True,
             "table_name": table_name,
             "file_path": file_path,
-            "index_info": {
-                "type": index_type,
-                "column": index_column
-            }
+            "index_info": index_info
         }
     
     def _parse_select(self, node: exp.Select) -> Dict[str, Any]:
@@ -173,19 +178,15 @@ class QueryParser:
     
     def _parse_where(self, where_clause: exp.Expression) -> List[Dict[str, Any]]:
         """Parse WHERE clause conditions"""
-        print(f"[DEBUG] Parsing WHERE clause: {where_clause}")
         filters = []
 
         if isinstance(where_clause, exp.Where):
             # If it's a Where node, get the actual condition
             where_clause = where_clause.this
-            print(f"[DEBUG] Extracted condition from Where node: {where_clause}")
 
         if isinstance(where_clause, exp.EQ):
-            print(f"[DEBUG] Processing equality condition: {where_clause}")
             column = where_clause.this.sql() if isinstance(where_clause.this, exp.Column) else where_clause.left.sql()
             value = where_clause.expression.sql() if hasattr(where_clause, 'expression') else where_clause.right.sql()
-            print(f"[DEBUG] Extracted column: {column}, value: {value}")
             filters.append({
                 "column": column,
                 "operation": "=",
@@ -223,35 +224,28 @@ class QueryParser:
             else:
                 filters.append({"error": "Unsupported IN clause"})
 
-        print(f"[DEBUG] Returning filters: {filters}")
         return filters
     
     def _parse_insert(self, node: exp.Insert) -> Dict[str, Any]:
         """Parse INSERT query"""
-        print("[DEBUG] Parsing INSERT node:", node)
         
         # Get table name and convert to lowercase
         table_name = node.this.this.sql().strip("'\"").lower()
-        print("[DEBUG] Table name:", table_name)
         
         # Get values from the VALUES clause
         values = []
         if node.args.get('expression') and hasattr(node.args['expression'], 'expressions'):
-            print("[DEBUG] Processing expressions:", node.args['expression'].expressions)
             for tuple_expr in node.args['expression'].expressions:
                 if hasattr(tuple_expr, 'expressions'):
                     # Each tuple contains one value
                     val = tuple_expr.expressions[0].sql().strip("'\"")
-                    print("[DEBUG] Raw value:", val)
                     # Handle ARRAY constructor
                     if val.upper().startswith('ARRAY['):
                         val = val[6:-1]  # Remove ARRAY[ and ]
                     # Remove any extra whitespace and quotes
                     val = val.strip().strip("'\"")
-                    print("[DEBUG] Processed value:", val)
                     values.append(val)
             
-        print("[DEBUG] Final values:", values)
         return {
             "type": "INSERT",
             "table_name": table_name,
@@ -260,23 +254,30 @@ class QueryParser:
     
     def _parse_delete(self, node: exp.Delete) -> Dict[str, Any]:
         """Parse DELETE query"""
-        print("[DEBUG] Parsing DELETE query")
-        print(f"[DEBUG] DELETE node args: {node.args}")
         
         # Check for WHERE clause
         if not node.args.get("where"):
-            print("[DEBUG] No WHERE clause found in DELETE query")
             return {"error": "DELETE requires WHERE clause"}
             
         # Convert table name to lowercase
         table_name = node.this.this.sql().strip("'\"").lower()  # Convert to lowercase
-        print(f"[DEBUG] DELETE from table: {table_name}")
         
         filters = self._parse_where(node.args["where"])
-        print(f"[DEBUG] Parsed WHERE clause filters: {filters}")
         
         return {
             "type": "DELETE",
             "table_name": table_name,
             "filters": filters
+        }
+
+    def _parse_drop_table(self, query: str) -> Dict[str, Any]:
+        """Parse DROP TABLE query"""
+        match = re.search(r'DROP TABLE (\w+);?', query, re.IGNORECASE)
+        if not match:
+            return {"error": "Invalid DROP TABLE syntax"}
+            
+        table_name = match.group(1).lower()  # Convert to lowercase
+        return {
+            "type": "DROP",
+            "table_name": table_name
         }

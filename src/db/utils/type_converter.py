@@ -1,6 +1,6 @@
 import struct
 from datetime import datetime
-from typing import Any, List, Tuple
+from typing import Any, List
 
 class TypeConverter:
     @staticmethod
@@ -25,9 +25,6 @@ class TypeConverter:
     @staticmethod
     def convert_record(values: List[Any], columns: List[dict], format_str: str) -> bytes:
         """Convert a list of values to binary record format"""
-        print(f"[DEBUG] Converting record. Values: {values}")
-        print(f"[DEBUG] Columns: {columns}")
-        print(f"[DEBUG] Format string: {format_str}")
         
         # Convert values to appropriate types
         converted_values = []
@@ -36,15 +33,12 @@ class TypeConverter:
         
         # Convert actual data values
         for value, col in zip(values, columns):
-            print(f"[DEBUG] Converting value {value} for column {col}")
             converted = TypeConverter.convert_value(value, col["type"])
-            print(f"[DEBUG] Converted to: {converted}")
             if isinstance(converted, tuple):
                 converted_values.extend(converted)
             else:
                 converted_values.append(converted)
 
-        print(f"[DEBUG] Final converted values: {converted_values}")
         # Pack into binary format
         return struct.pack(format_str, *converted_values)
 

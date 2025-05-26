@@ -155,18 +155,18 @@ class BPlusTreeIndex:
             return
 
         # File exists, check if it's properly initialized
-            with BlockCursor(self.index_filename, PAGE_SIZE) as cursor:
-                header_data = cursor.read_block(0)
-            if header_data is None or len(header_data) == 0:
-                # File exists but is empty, create new tree
-                self.create_empty()
-                return
+        with BlockCursor(self.index_filename, PAGE_SIZE) as cursor:
+            header_data = cursor.read_block(0)
+        if header_data is None or len(header_data) == 0:
+            # File exists but is empty, create new tree
+            self.create_empty()
+            return
 
-            # Ensure header is properly formatted
-            try:
-                self.root_block = struct.unpack(HEADER_FORMAT, header_data[:HEADER_SIZE])[0]
-            except struct.error:
-                raise ValueError("Invalid header block format")
+        # Ensure header is properly formatted
+        try:
+            self.root_block = struct.unpack(HEADER_FORMAT, header_data[:HEADER_SIZE])[0]
+        except struct.error:
+            raise ValueError("Invalid header block format")
 
     def create_empty(self):
         """Create an empty B+ tree index structure"""
@@ -455,12 +455,11 @@ class BPlusTreeIndex:
                 raise ValueError(f"Unsupported key type: {type(key_bytes)}")
             return key_bytes
         except Exception as e:
-            print(f"[DEBUG] Error extracting key: {e}")
+            print(f"Error extracting key: {e}")
             raise
 
     def insert_key_and_position(self, key, position):
         """Insert a key and position into the index without writing to data file"""
-        print(f"[DEBUG] Inserting key {key} at position {position}")
         self._insert_entry(key, position)
 
     def _write_data_record(self, data):
@@ -473,26 +472,24 @@ class BPlusTreeIndex:
 
     def add(self, data):
         """Insert a new record into the index and data"""
-        print(f"[DEBUG] Adding record to index. Data length: {len(data)}, Expected size: {self.record_size}")
         if len(data) != self.record_size:
             raise ValueError(f"Data size must be {self.record_size} bytes, got {len(data)} bytes")
 
         try:
             key = self._extract_key(data)
-            print(f"[DEBUG] Successfully extracted key: {key}")
             ptr = self._write_data_record(data)  # ptr is the line number
-            print(f"[DEBUG] Record written at position: {ptr}")
             self._insert_entry(key, ptr)
-            print(f"[DEBUG] Successfully inserted entry with key {key} at position {ptr}")
         except Exception as e:
-            print(f"[DEBUG] Error in add method: {e}")
+            print(f"[Error in add method: {e}")
             raise
 
     def remove(self, key):
         """Elimina clave y reequilibra según algoritmo del paper."""
         with BlockCursor(self.index_filename, PAGE_SIZE) as c:
             # Descender hasta la hoja y guardar stack de (blk, page, idx)
-            stack=[]; blk=self.root_block
+            stack=[]
+            blk=self.root_block
+
             while True:
                 pg=self._parse_page(c.read_block(blk))
                 if pg.is_leaf:
@@ -501,10 +498,12 @@ class BPlusTreeIndex:
                 idx = bisect.bisect_right(pg.keys, key)
                 stack.append((blk, pg, idx))
                 blk = pg.pointers[idx]
+
             # Borrar en hoja
             for i,(k,p) in enumerate(leaf.key_value_pairs):
                 if k==key:
-                    leaf.key_value_pairs.pop(i); leaf.num_keys-=1
+                    leaf.key_value_pairs.pop(i)
+                    leaf.num_keys-=1
                     c.update_block(leaf_blk, leaf.pack())
                     break
             else:
@@ -517,6 +516,7 @@ class BPlusTreeIndex:
         # Umbrales mínimos
         min_leaf = (self.leaf_capacity+1)//2
         min_int  = (self.internal_capacity+1)//2
+
         # Caso root
         if node.parent_id < 0:
             if not node.is_leaf and node.num_keys==0:
@@ -527,14 +527,17 @@ class BPlusTreeIndex:
                     c.update_block(child_blk, child.pack())
                     self._update_root_block(child_blk)
             return
+        
         # Check underflow
         if (node.is_leaf and node.num_keys>=min_leaf) or (not node.is_leaf and node.num_keys>=min_int):
             return
+        
         # Obtener padre info
         parent_blk, parent_pg, idx = stack.pop()
         # IDs de hermanos
         left_blk  = parent_pg.pointers[idx-1] if idx>0 else None
         right_blk = parent_pg.pointers[idx+1] if idx<parent_pg.num_keys else None
+
         # Leaf case
         if node.is_leaf:
             left = self._parse_page(c.read_block(left_blk)) if left_blk else None
@@ -542,24 +545,41 @@ class BPlusTreeIndex:
             # Prestar de left
             if left and left.num_keys>min_leaf:
                 k,p = left.key_value_pairs.pop(-1)
-                node.key_value_pairs.insert(0,(k,p)); left.num_keys-=1; node.num_keys+=1
+                node.key_value_pairs.insert(0,(k,p))
+                left.num_keys-=1
+                node.num_keys+=1
                 parent_pg.keys[idx-1]=node.key_value_pairs[0][0]
-                c.update_block(left_blk,left.pack()); c.update_block(blk,node.pack()); c.update_block(parent_blk,parent_pg.pack()); return
+                c.update_block(left_blk,left.pack())
+                c.update_block(blk,node.pack())
+                c.update_block(parent_blk,parent_pg.pack())
+                return
             # Prestar de right
             if right and right.num_keys>min_leaf:
                 k,p = right.key_value_pairs.pop(0)
-                node.key_value_pairs.append((k,p)); right.num_keys-=1; node.num_keys+=1
+                node.key_value_pairs.append((k,p))
+                right.num_keys-=1
+                node.num_keys+=1
                 parent_pg.keys[idx]=right.key_value_pairs[0][0]
-                c.update_block(right_blk,right.pack()); c.update_block(blk,node.pack()); c.update_block(parent_blk,parent_pg.pack()); return
+                c.update_block(right_blk,right.pack())
+                c.update_block(blk,node.pack())
+                c.update_block(parent_blk,parent_pg.pack())
+                return
             # Merge
             if left:
-                left.key_value_pairs += node.key_value_pairs; left.next_leaf = node.next_leaf; left.num_keys=len(left.key_value_pairs)
+                left.key_value_pairs += node.key_value_pairs
+                left.next_leaf = node.next_leaf
+                left.num_keys=len(left.key_value_pairs)
                 c.update_block(left_blk,left.pack())
-                parent_pg.keys.pop(idx-1); parent_pg.pointers.pop(idx)
+                parent_pg.keys.pop(idx-1)
+                parent_pg.pointers.pop(idx)
             else:
-                node.key_value_pairs += right.key_value_pairs; node.next_leaf = right.next_leaf; node.num_keys=len(node.key_value_pairs)
+                node.key_value_pairs += right.key_value_pairs
+                node.next_leaf = right.next_leaf
+                node.num_keys=len(node.key_value_pairs)
                 c.update_block(blk,node.pack())
-                parent_pg.keys.pop(idx); parent_pg.pointers.pop(idx+1)
+                parent_pg.keys.pop(idx)
+                parent_pg.pointers.pop(idx+1)
+
             parent_pg.num_keys=len(parent_pg.keys)
             c.update_block(parent_blk,parent_pg.pack())
             # Recursión
@@ -574,29 +594,42 @@ class BPlusTreeIndex:
                 sep = parent_pg.keys[idx-1]
                 k = left.keys.pop(-1)
                 p = left.pointers.pop(-1)
-                node.keys.insert(0, sep); node.pointers.insert(0,p)
+                node.keys.insert(0, sep)
+                node.pointers.insert(0,p)
                 parent_pg.keys[idx-1]=k
-                left.num_keys-=1; node.num_keys+=1
+                left.num_keys-=1
+                node.num_keys+=1
+
                 # Actualizar padre del puntero movido
                 child = self._parse_page(c.read_block(p))
                 if child:
                     child.parent_id = blk
                     c.update_block(p, child.pack())
-                c.update_block(left_blk,left.pack()); c.update_block(blk,node.pack()); c.update_block(parent_blk,parent_pg.pack()); return
+                c.update_block(left_blk,left.pack())
+                c.update_block(blk,node.pack())
+                c.update_block(parent_blk,parent_pg.pack())
+                return
             # Borrow from right
             if right and right.num_keys>min_int:
                 sep = parent_pg.keys[idx]
                 k = right.keys.pop(0)
                 p = right.pointers.pop(0)
-                node.keys.append(sep); node.pointers.append(p)
+                node.keys.append(sep)
+                node.pointers.append(p)
                 parent_pg.keys[idx]=k
-                right.num_keys-=1; node.num_keys+=1
+                right.num_keys-=1
+                node.num_keys+=1
+
                 # Actualizar padre del puntero movido
                 child = self._parse_page(c.read_block(p))
                 if child:
                     child.parent_id = blk
                     c.update_block(p, child.pack())
-                c.update_block(right_blk,right.pack()); c.update_block(blk,node.pack()); c.update_block(parent_blk,parent_pg.pack()); return
+
+                c.update_block(right_blk,right.pack())
+                c.update_block(blk,node.pack())
+                c.update_block(parent_blk,parent_pg.pack())
+                return
             # Merge
             if left:
                 # merge node into left
@@ -658,19 +691,3 @@ class BPlusTreeIndex:
                     print(f"Nodo Interno {internal.page_id} (padre: {internal.parent_id}) -> Claves: {internal.keys} | Punteros: {internal.pointers}")
                     # Asegurar que todos los punteros se agreguen
                     queue.extend([(ptr, level+1) for ptr in page.pointers if ptr != -1])
-
-    def debug_search(self, key):
-        print(f"\n*** Rastreando clave {key} ***")
-        with BlockCursor(self.index_filename, PAGE_SIZE) as cursor:
-            current_block = self.root_block
-            while True:
-                data = cursor.read_block(current_block)
-                page = self._parse_page(data)
-                print(f"Bloque {current_block} ({'Hoja' if page.is_leaf else 'Interno'}): Claves={page.keys if not page.is_leaf else [k for k, _ in page.key_value_pairs]}")
-                if page.is_leaf:
-                    break
-                else:
-                    idx = bisect.bisect_right(page.keys, key)
-                    print(f"Enrutando a puntero[{idx}]: {page.pointers[idx]}")
-                    current_block = page.pointers[idx]
-        print("--- Fin del rastreo ---")

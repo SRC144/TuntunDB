@@ -1,7 +1,7 @@
-# Gestor de Base de Datos - Proyecto Universitario
+# Proyecto 1 - Base de datos II 
 
 ## Descripción
-Sistema de gestión de bases de datos desarrollado para el curso de Base de Datos II, implementando una arquitectura de tres capas con énfasis en el rendimiento de consultas mediante indexación y capacidad de importación de datos desde archivos CSV.
+Sistema de gestión de bases de datos desarrollado para el curso de Base de Datos II, implementando una arquitectura de tres capas con énfasis en la implementación de indices en la capa del motor de base de datos.
 
 ## Autores
 - Sergio Cortez
@@ -20,7 +20,7 @@ Sistema de gestión de bases de datos desarrollado para el curso de Base de Dato
 ![Diagrama de flujo del sistema](bd2_proyect.png)
 
 ### Flujo de Consultas
-1. **Interfaz de Usuario** → El usuario interactúa con la interfaz React, que envía consultas SQL o archivos CSV mediante llamadas HTTP.
+1. **Interfaz de Usuario** → El usuario interactúa con la interfaz, que envía consultas SQL o archivos CSV mediante llamadas HTTP.
 
 2. **Capa API** → El servidor Flask actúa como intermediario:
    - Recibe y valida las peticiones
@@ -34,11 +34,12 @@ Sistema de gestión de bases de datos desarrollado para el curso de Base de Dato
    - El comando correspondiente:
      * Selecciona la estrategia de acceso (índices o secuencial) 
      * Realiza operaciones sobre los datos
-     * Gestiona el almacenamiento en disco
+     * Gestiona el almacenamiento en disco (Almacenamos en el directorio src/data)
    - Para importación CSV:
      * Se analiza la estructura del archivo
      * Se crea una tabla con el esquema apropiado
      * Importamos los datos optimizando el almacenamiento
+     * Proporcionamos el script `create_from_files.py` para probar esta funcionalidad
 
 4. **Flujo de Retorno** → Los resultados atraviesan el camino inverso:
    - El motor empaqueta los resultados
@@ -48,7 +49,7 @@ Sistema de gestión de bases de datos desarrollado para el curso de Base de Dato
 ## Componentes Principales
 
 ### Motor de Base de Datos
-- Operaciones CRUD
+- Operaciones CRD (No se implemento comando update)
 - Indexación:
   - B+Tree
   - Sequential File
@@ -60,16 +61,13 @@ Sistema de gestión de bases de datos desarrollado para el curso de Base de Dato
 
 ### API REST
 - Endpoints para operaciones de base de datos
-- Manejo de consultas en lote
-- Soporte para carga de archivos CSV
 - Validación y gestión de errores
 
 ### Frontend
 - Interfaz interactiva en React
+- Proporcionamos consultas ejemplo que se pueden cargar de manera interactiva
 - Editor de consultas SQL
 - Visualización de resultados
-- Carga y visualización de archivos CSV
-- Gestión visual de tablas e índices
 
 ## Tecnologías
 - Backend: Python (Flask)
@@ -82,7 +80,7 @@ Ver `requirements.txt` (backend) y `package.json` (frontend)
 ## Ejemplo de Uso
 ```sql
 -- Crear tabla desde CSV
-CREATE TABLE FROM CSV 'datos.csv';
+create table cancer from file 'cancer_data.csv;
 
 -- Consultas típicas
 CREATE TABLE Usuarios (...);

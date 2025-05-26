@@ -12,7 +12,7 @@ class IndexFactory:
         "sequential": SequentialFileIndex,
         "isam": ISAMSparseIndex,
         "hash": ExtendibleHashingIndex,
-        "bplus": BPlusTreeIndex,
+        "bplus": BPlusTreeIndex,  # B+ Tree implementation
         "rtree": RTreeIndex
     }
 
@@ -29,12 +29,12 @@ class IndexFactory:
             key_position: Position of the key in the record (optional)
             **kwargs: Additional arguments for specific index types
         """
-        #Validar tipo de índice
-        index_class = cls._INDEX_CLASSES.get(index_type.lower())
+        # Case-insensitive lookup
+        index_class = cls._INDEX_CLASSES.get(index_type.lower().replace('-', '').replace('_', ''))
         if not index_class:
-            raise ValueError(f"Tipo de índice no válido: {index_type}")
+            raise ValueError(f"Invalid index type: {index_type}")
 
-        #Crear instancia
+        # Create instance
         return index_class(
             index_filename=index_filename,
             data_filename=data_filename,

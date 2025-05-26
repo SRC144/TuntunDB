@@ -8,11 +8,10 @@ from ...cursors import BlockCursor
 PAGE_SIZE = 4096  # 4KB pages
 KEY_SIZE = 8  # 8 bytes for key (uint64)
 PTR_SIZE = 8  # 8 bytes for pointer (signed long long)
-PAGE_HEADER_SIZE = 16  # is_leaf(1) + num_keys(2) + page_id(4) + parent_id(8) + overflow(1)
+PAGE_HEADER_SIZE = 15  # is_leaf(1) + num_keys(2) + page_id(4) + parent_id(8)
 HEADER_SIZE = 8  # root_block(8)
 
 # Format strings
-KEY_FORMAT = "=Q"  # 8 bytes for keys (unsigned long long)
 PTR_FORMAT = "=q"  # 8 bytes for pointers (signed long long)
 PAGE_HEADER_FORMAT = "=BHiq"  # is_leaf(1) + num_keys(2) + page_id(4) + parent_id(8)
 HEADER_FORMAT = "=q"  # root_block(8)
@@ -24,7 +23,7 @@ class BPlusPage:
         self.num_keys = num_keys
         self.page_id = page_id
         self.parent_id = parent_id
-        
+
     def header_bytes(self):
         """Pack page header into bytes"""
         return struct.pack(PAGE_HEADER_FORMAT,
@@ -34,34 +33,19 @@ class BPlusPage:
             self.parent_id
         )
 
-    @staticmethod
-    def pack_key(key: int) -> bytes:
-        """Pack a uint64 key into bytes"""
-        if not isinstance(key, int):
-            raise ValueError("B+ tree keys must be integers")
-        if key < 0 or key > 18446744073709551615:  # 2^64 - 1
-            raise ValueError("B+ tree keys must be unsigned 64-bit integers")
-        return struct.pack(KEY_FORMAT, key)
-        
-    @staticmethod
-    def unpack_key(data: bytes, offset: int) -> tuple[int, int]:
-        """Unpack a key and return (key, new_offset)"""
-        key = struct.unpack(KEY_FORMAT, data[offset:offset + KEY_SIZE])[0]
-        return key, offset + KEY_SIZE
-
 class InternalPage(BPlusPage):
     def __init__(self, page_id, parent_id, keys, pointers):
         super().__init__(is_leaf=0, num_keys=len(keys), page_id=page_id, parent_id=parent_id)
-        self.keys = keys
+        self.keys = keys  # List of raw key bytes
         self.pointers = pointers
-        
+
     def pack(self):
         """Pack page into bytes"""
         data = self.header_bytes()
         
-        # Pack keys and pointers
-        for i, (key, ptr) in enumerate(zip(self.keys, self.pointers)):
-            data += self.pack_key(key)
+        # Pack keys and pointers - keys are already raw bytes
+        for key, ptr in zip(self.keys, self.pointers):
+            data += key  # Key is already raw bytes
             data += struct.pack(PTR_FORMAT, ptr)
             
         # Pack last pointer
@@ -74,43 +58,44 @@ class InternalPage(BPlusPage):
         """Unpack page data"""
         header = data[:PAGE_HEADER_SIZE]
         is_leaf, num_keys, page_id, parent_id = struct.unpack(PAGE_HEADER_FORMAT, header)
-        
+
         if is_leaf:
             raise ValueError("Not an internal page")
-            
+
         # Read keys and pointers
         keys = []
         pointers = []
         offset = PAGE_HEADER_SIZE
         
         for i in range(num_keys):
-            # Read key
-            key, new_offset = cls.unpack_key(data, offset)
+            # Read key as raw bytes
+            key = data[offset:offset + KEY_SIZE]
+            offset += KEY_SIZE
             # Read pointer
-            ptr = struct.unpack(PTR_FORMAT, data[new_offset:new_offset + PTR_SIZE])[0]
+            ptr = struct.unpack(PTR_FORMAT, data[offset:offset + PTR_SIZE])[0]
             keys.append(key)
             pointers.append(ptr)
-            offset = new_offset + PTR_SIZE
+            offset += PTR_SIZE
             
         # Read last pointer
         last_ptr = struct.unpack(PTR_FORMAT, data[offset:offset + PTR_SIZE])[0]
         pointers.append(last_ptr)
-        
+
         return cls(page_id, parent_id, keys, pointers)
 
 class LeafPage(BPlusPage):
     def __init__(self, page_id, parent_id, key_value_pairs, next_leaf):
         super().__init__(is_leaf=1, num_keys=len(key_value_pairs), page_id=page_id, parent_id=parent_id)
-        self.key_value_pairs = key_value_pairs
+        self.key_value_pairs = key_value_pairs  # List of (key_bytes, ptr) tuples
         self.next_leaf = next_leaf
-        
+
     def pack(self):
         """Pack page into bytes"""
         data = self.header_bytes()
         
-        # Pack key-value pairs
+        # Pack key-value pairs - keys are already raw bytes
         for key, ptr in self.key_value_pairs:
-            data += self.pack_key(key)
+            data += key  # Key is already raw bytes
             data += struct.pack(PTR_FORMAT, ptr)
             
         # Pack next leaf pointer
@@ -123,25 +108,26 @@ class LeafPage(BPlusPage):
         """Unpack page data"""
         header = data[:PAGE_HEADER_SIZE]
         is_leaf, num_keys, page_id, parent_id = struct.unpack(PAGE_HEADER_FORMAT, header)
-        
+
         if not is_leaf:
             raise ValueError("Not a leaf page")
-            
+
         # Read key-value pairs
         key_value_pairs = []
         offset = PAGE_HEADER_SIZE
-        
+
         for i in range(num_keys):
-            # Read key
-            key, new_offset = cls.unpack_key(data, offset)
+            # Read key as raw bytes
+            key = data[offset:offset + KEY_SIZE]
+            offset += KEY_SIZE
             # Read pointer
-            ptr = struct.unpack(PTR_FORMAT, data[new_offset:new_offset + PTR_SIZE])[0]
+            ptr = struct.unpack(PTR_FORMAT, data[offset:offset + PTR_SIZE])[0]
             key_value_pairs.append((key, ptr))
-            offset = new_offset + PTR_SIZE
-            
+            offset += PTR_SIZE
+
         # Read next leaf pointer
         next_leaf = struct.unpack(PTR_FORMAT, data[-PTR_SIZE:])[0]
-        
+
         return cls(page_id, parent_id, key_value_pairs, next_leaf)
 
 class BPlusTreeIndex:
@@ -159,30 +145,31 @@ class BPlusTreeIndex:
 
         self._init_storage()
 
-        #manejar mejor luego
-        if data_filename:
-            self.build_from_data()
+        # Don't build from data immediately since the data file might be empty
+        # The index will be built when data is inserted
 
     def _init_storage(self):
         file_exists = os.path.exists(self.index_filename)
         if not file_exists:
-            self._create_empty_tree()
+            self.create_empty()
             return
-            
-        with BlockCursor(self.index_filename, PAGE_SIZE) as cursor:
-            header_data = cursor.read_block(0)
+
+        # File exists, check if it's properly initialized
+            with BlockCursor(self.index_filename, PAGE_SIZE) as cursor:
+                header_data = cursor.read_block(0)
             if header_data is None or len(header_data) == 0:
                 # File exists but is empty, create new tree
-                self._create_empty_tree()
+                self.create_empty()
                 return
-                
+
             # Ensure header is properly formatted
             try:
                 self.root_block = struct.unpack(HEADER_FORMAT, header_data[:HEADER_SIZE])[0]
             except struct.error:
                 raise ValueError("Invalid header block format")
 
-    def _create_empty_tree(self):
+    def create_empty(self):
+        """Create an empty B+ tree index structure"""
         with BlockCursor(self.index_filename, PAGE_SIZE) as cursor:
             root_block = 1
             header_data = struct.pack(HEADER_FORMAT, root_block).ljust(HEADER_SIZE, b'\x00')
@@ -206,26 +193,22 @@ class BPlusTreeIndex:
             return InternalPage.unpack(data)
 
     def build_from_data(self):
-        # Reiniciar índice en disco
+        """Build index from existing data file"""
+        # Reset index on disk
         if os.path.exists(self.index_filename):
             os.remove(self.index_filename)
         self._init_storage()
         
-        # Create table_info dict for LineCursor
-        table_info = {
-            "data_file": self.data_filename,
-            "format_str": self.data_format
-        }
-        
-        # Recorrer datos existentes y poblar árbol
-        with LineCursor(table_info) as lc:
-            total = lc.total_lines()
-            for ptr in range(total):
-                lc.goto_line(ptr)
-                raw = lc.file.read(self.record_size)
-                key = self._extract_key(raw)
-                # Insertar directamente sin reescribir datos
-                self._insert_entry(key, ptr)
+        # Read data file and add each record
+        try:
+            with open(self.data_filename, 'rb') as f:
+                while True:
+                    raw = f.read(self.record_size)
+                    if not raw or len(raw) < self.record_size:
+                        break
+                    self.add(raw)
+        except Exception as e:
+            raise ValueError(f"Failed to build index: {str(e)}")
 
     def search(self, key):
         with BlockCursor(self.index_filename, PAGE_SIZE) as cursor:
@@ -319,6 +302,10 @@ class BPlusTreeIndex:
                 low = mid + 1
             else:
                 high = mid
+
+        # Para duplicados, avanzar hasta el último elemento con la misma clave
+        while low < len(entries) and entries[low][0] == key:
+            low += 1
 
         return entries[:low] + [new_entry] + entries[low:]
 
@@ -439,10 +426,6 @@ class BPlusTreeIndex:
         with BlockCursor(self.index_filename, PAGE_SIZE) as cursor:
             page = self._find_leaf_page(cursor, key, stack)
 
-            # verificar duplicados
-            if any(k == key for k, _ in page.key_value_pairs):
-                raise ValueError(f"Key {key} already exists")
-
             # insertar en la hoja
             temp_entries = self._insert_into_temp_entries(page.key_value_pairs, key, ptr)
 
@@ -455,29 +438,204 @@ class BPlusTreeIndex:
             self._propagate_split(stack, promoted_key, page.page_id, new_leaf.page_id, cursor)
 
     def _extract_key(self, data):
-        """Extract key from raw data - assumes key is already in numeric format"""
-        unpacked = struct.unpack(self.data_format, data)
-        return unpacked[self.key_position]  # Assume caller has converted to numeric format
-        
-    def add(self, key, ptr):
-        """Add a new key-pointer pair to the index"""
-        # Convert pointer to signed long long range if needed
-        if isinstance(ptr, int):
-            ptr = max(-9223372036854775808, min(ptr, 9223372036854775807))
-        self._insert_entry(key, ptr)
+        """Extract key from raw data - just get the raw bytes for the key"""
+        try:
+            unpacked = struct.unpack(self.data_format, data)
+            key_bytes = unpacked[self.key_position]
+            if isinstance(key_bytes, int):
+                # Convert integer to bytes
+                key_bytes = key_bytes.to_bytes(KEY_SIZE, byteorder='little')
+            elif isinstance(key_bytes, str):
+                # Convert string to bytes
+                key_bytes = key_bytes.encode().ljust(KEY_SIZE, b'\x00')
+            elif isinstance(key_bytes, bytes):
+                # Already bytes, just ensure right size
+                key_bytes = key_bytes[:KEY_SIZE].ljust(KEY_SIZE, b'\x00')
+            else:
+                raise ValueError(f"Unsupported key type: {type(key_bytes)}")
+            return key_bytes
+        except Exception as e:
+            print(f"[DEBUG] Error extracting key: {e}")
+            raise
 
-    def remove(self):
-        pass
+    def insert_key_and_position(self, key, position):
+        """Insert a key and position into the index without writing to data file"""
+        print(f"[DEBUG] Inserting key {key} at position {position}")
+        self._insert_entry(key, position)
+
+    def _write_data_record(self, data):
+        """Write data record to file and return its line number"""
+        with LineCursor(self.data_filename, self.record_size) as lc:
+            lc.goto_end()
+            position = lc.current_record_number()
+            lc.append_record(data)
+            return position
+
+    def add(self, data):
+        """Insert a new record into the index and data"""
+        print(f"[DEBUG] Adding record to index. Data length: {len(data)}, Expected size: {self.record_size}")
+        if len(data) != self.record_size:
+            raise ValueError(f"Data size must be {self.record_size} bytes, got {len(data)} bytes")
+
+        try:
+            key = self._extract_key(data)
+            print(f"[DEBUG] Successfully extracted key: {key}")
+            ptr = self._write_data_record(data)  # ptr is the line number
+            print(f"[DEBUG] Record written at position: {ptr}")
+            self._insert_entry(key, ptr)
+            print(f"[DEBUG] Successfully inserted entry with key {key} at position {ptr}")
+        except Exception as e:
+            print(f"[DEBUG] Error in add method: {e}")
+            raise
+
+    def remove(self, key):
+        """Elimina clave y reequilibra según algoritmo del paper."""
+        with BlockCursor(self.index_filename, PAGE_SIZE) as c:
+            # Descender hasta la hoja y guardar stack de (blk, page, idx)
+            stack=[]; blk=self.root_block
+            while True:
+                pg=self._parse_page(c.read_block(blk))
+                if pg.is_leaf:
+                    leaf, leaf_blk = pg, blk
+                    break
+                idx = bisect.bisect_right(pg.keys, key)
+                stack.append((blk, pg, idx))
+                blk = pg.pointers[idx]
+            # Borrar en hoja
+            for i,(k,p) in enumerate(leaf.key_value_pairs):
+                if k==key:
+                    leaf.key_value_pairs.pop(i); leaf.num_keys-=1
+                    c.update_block(leaf_blk, leaf.pack())
+                    break
+            else:
+                return False
+            # Reequilibrio
+            self._delete_rebalance(c, leaf, leaf_blk, stack)
+        return True
+
+    def _delete_rebalance(self, c, node, blk, stack):
+        # Umbrales mínimos
+        min_leaf = (self.leaf_capacity+1)//2
+        min_int  = (self.internal_capacity+1)//2
+        # Caso root
+        if node.parent_id < 0:
+            if not node.is_leaf and node.num_keys==0:
+                child_blk = node.pointers[0]
+                child = self._parse_page(c.read_block(child_blk))
+                if child:
+                    child.parent_id = -1
+                    c.update_block(child_blk, child.pack())
+                    self._update_root_block(child_blk)
+            return
+        # Check underflow
+        if (node.is_leaf and node.num_keys>=min_leaf) or (not node.is_leaf and node.num_keys>=min_int):
+            return
+        # Obtener padre info
+        parent_blk, parent_pg, idx = stack.pop()
+        # IDs de hermanos
+        left_blk  = parent_pg.pointers[idx-1] if idx>0 else None
+        right_blk = parent_pg.pointers[idx+1] if idx<parent_pg.num_keys else None
+        # Leaf case
+        if node.is_leaf:
+            left = self._parse_page(c.read_block(left_blk)) if left_blk else None
+            right= self._parse_page(c.read_block(right_blk)) if right_blk else None
+            # Prestar de left
+            if left and left.num_keys>min_leaf:
+                k,p = left.key_value_pairs.pop(-1)
+                node.key_value_pairs.insert(0,(k,p)); left.num_keys-=1; node.num_keys+=1
+                parent_pg.keys[idx-1]=node.key_value_pairs[0][0]
+                c.update_block(left_blk,left.pack()); c.update_block(blk,node.pack()); c.update_block(parent_blk,parent_pg.pack()); return
+            # Prestar de right
+            if right and right.num_keys>min_leaf:
+                k,p = right.key_value_pairs.pop(0)
+                node.key_value_pairs.append((k,p)); right.num_keys-=1; node.num_keys+=1
+                parent_pg.keys[idx]=right.key_value_pairs[0][0]
+                c.update_block(right_blk,right.pack()); c.update_block(blk,node.pack()); c.update_block(parent_blk,parent_pg.pack()); return
+            # Merge
+            if left:
+                left.key_value_pairs += node.key_value_pairs; left.next_leaf = node.next_leaf; left.num_keys=len(left.key_value_pairs)
+                c.update_block(left_blk,left.pack())
+                parent_pg.keys.pop(idx-1); parent_pg.pointers.pop(idx)
+            else:
+                node.key_value_pairs += right.key_value_pairs; node.next_leaf = right.next_leaf; node.num_keys=len(node.key_value_pairs)
+                c.update_block(blk,node.pack())
+                parent_pg.keys.pop(idx); parent_pg.pointers.pop(idx+1)
+            parent_pg.num_keys=len(parent_pg.keys)
+            c.update_block(parent_blk,parent_pg.pack())
+            # Recursión
+            self._delete_rebalance(c, parent_pg, parent_blk, stack)
+        else:
+            # Internal node underflow
+            left = self._parse_page(c.read_block(left_blk)) if left_blk else None
+            right= self._parse_page(c.read_block(right_blk)) if right_blk else None
+            # Borrow from left
+            if left and left.num_keys>min_int:
+                # move separator down
+                sep = parent_pg.keys[idx-1]
+                k = left.keys.pop(-1)
+                p = left.pointers.pop(-1)
+                node.keys.insert(0, sep); node.pointers.insert(0,p)
+                parent_pg.keys[idx-1]=k
+                left.num_keys-=1; node.num_keys+=1
+                # Actualizar padre del puntero movido
+                child = self._parse_page(c.read_block(p))
+                if child:
+                    child.parent_id = blk
+                    c.update_block(p, child.pack())
+                c.update_block(left_blk,left.pack()); c.update_block(blk,node.pack()); c.update_block(parent_blk,parent_pg.pack()); return
+            # Borrow from right
+            if right and right.num_keys>min_int:
+                sep = parent_pg.keys[idx]
+                k = right.keys.pop(0)
+                p = right.pointers.pop(0)
+                node.keys.append(sep); node.pointers.append(p)
+                parent_pg.keys[idx]=k
+                right.num_keys-=1; node.num_keys+=1
+                # Actualizar padre del puntero movido
+                child = self._parse_page(c.read_block(p))
+                if child:
+                    child.parent_id = blk
+                    c.update_block(p, child.pack())
+                c.update_block(right_blk,right.pack()); c.update_block(blk,node.pack()); c.update_block(parent_blk,parent_pg.pack()); return
+            # Merge
+            if left:
+                # merge node into left
+                sep = parent_pg.keys.pop(idx-1)
+                left.keys.append(sep)
+                left.keys += node.keys
+                left.pointers += node.pointers
+                left.num_keys=len(left.keys)
+                # Actualizar padres de los punteros movidos
+                for p in node.pointers:
+                    child = self._parse_page(c.read_block(p))
+                    if child:
+                        child.parent_id = left_blk
+                        c.update_block(p, child.pack())
+                c.update_block(left_blk,left.pack())
+                parent_pg.pointers.pop(idx)
+            else:
+                sep = parent_pg.keys.pop(idx)
+                node.keys.append(sep)
+                node.keys += right.keys
+                node.pointers += right.pointers
+                node.num_keys=len(node.keys)
+                # Actualizar padres de los punteros movidos
+                for p in right.pointers:
+                    child = self._parse_page(c.read_block(p))
+                    if child:
+                        child.parent_id = blk
+                        c.update_block(p, child.pack())
+                c.update_block(blk,node.pack())
+                parent_pg.pointers.pop(idx+1)
+            parent_pg.num_keys=len(parent_pg.keys)
+            c.update_block(parent_blk,parent_pg.pack())
+            # Recursión
+            self._delete_rebalance(c, parent_pg, parent_blk, stack)
 
     def get_record(self, ptr):
         """Obtiene el registro RAW del datafile"""
-        table_info = {
-            "data_file": self.data_filename,
-            "format_str": self.data_format
-        }
-        with LineCursor(table_info) as lc:
-            lc.goto_line(ptr)
-            return lc.file.read(self.record_size)  # Return raw bytes
+        with LineCursor(self.data_filename, self.record_size) as lc:
+            return lc.read_at(ptr)  # Return raw bytes
 
     def print_tree_structure(self):
         with BlockCursor(self.index_filename, PAGE_SIZE) as cursor:

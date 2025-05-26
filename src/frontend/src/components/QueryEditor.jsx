@@ -8,7 +8,7 @@ function QueryEditor({ value, onChange, onExecute, loading }) {
         <textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="Enter your SQL query here..."
+          placeholder="Ingrese su consulta SQL aquí..."
           className="w-full h-40 p-4 border border-gray-300 rounded-lg font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
         <button
@@ -44,7 +44,7 @@ function QueryEditor({ value, onChange, onExecute, loading }) {
           ) : (
             <PlayIcon className="-ml-1 mr-2 h-4 w-4" />
           )}
-          Execute
+          Ejecutar
         </button>
       </div>
     </div>

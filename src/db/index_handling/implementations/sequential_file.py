@@ -1,415 +1,258 @@
 import os
 import struct
+import math
 from typing import Any, Optional, List
 from ...cursors.line_cursor import LineCursor
-from ...cursors import BlockCursor
 
 class SequentialFileIndex:
-    
-    def __init__(self, data_filename: str, data_format: str, key_position: int = 0, block_size: int = 4096):
-
-        try:
-            self.record_size = struct.calcsize(data_format)
-        except struct.error:
-            raise ValueError(f"Invalid data format: {data_format}")
-        
+    def __init__(self, index_filename: str, data_filename: str, data_format: str, key_position: int = 0):
+        self.index_filename = index_filename
         self.data_filename = data_filename
         self.data_format = data_format
         self.key_position = key_position
-        self.block_size = block_size
+        self.record_size = struct.calcsize(data_format)
         
-        # Initialize cursors
-        self.table_info = {
-            "data_file": data_filename,
-            "format_str": data_format,
-            "columns": []  # This would need to be populated based on your schema
-        }
+        # Auxiliary file for unsorted records
+        self.aux_filename = f"{index_filename}.aux"
         
-        # Overflow area management
-        self.overflow_filename = f"{data_filename}.overflow"
-        self._init_files()
-        
-    def _init_files(self):
-        try:
-            # Initialize main data file with BlockCursor
-            with BlockCursor(self.data_filename, self.block_size) as cursor:
-                if cursor.total_blocks() == 0:
-                    cursor.append_block(b'\x00' * self.block_size)  # Initial block
-                    
-            # Initialize overflow file with LineCursor
-            with LineCursor(self.table_info) as lc:
-                if lc.total_lines() == 0:
-                    pass  # Just ensure file exists
-        except IOError as e:
-            raise IOError(f"Failed to initialize files: {str(e)}")
+        # Initialize files if they don't exist
+        if not os.path.exists(self.index_filename):
+            with open(self.index_filename, 'wb') as f:
+                pass
+                
+        if not os.path.exists(self.aux_filename):
+            with open(self.aux_filename, 'wb') as f:
+                pass
     
-    def _extract_key(self, record_data: bytes) -> Any:
+    def _extract_key(self, data: bytes) -> int:
+        """Extract key from record data as uint64"""
         try:
-            unpacked = struct.unpack(self.data_format, record_data)
+            unpacked = struct.unpack(self.data_format, data)
             return unpacked[self.key_position]
         except struct.error:
             raise ValueError("Invalid record data format")
     
-    def _read_record(self, position: int, from_overflow: bool = False) -> Optional[bytes]:
+    def _read_record(self, file_path: str, position: int) -> Optional[bytes]:
+        """Read a record from a file at given position"""
         try:
-            if from_overflow:
-                with LineCursor(self.table_info) as lc:
-                    lc.goto_line(position)
-                    return lc.file.read(self.record_size)
-            else:
-                with BlockCursor(self.data_filename, self.block_size) as cursor:
-                    block_num = position * self.record_size // self.block_size
-                    offset = (position * self.record_size) % self.block_size
-                    cursor.goto_block(block_num)
-                    block_data = cursor.read()
-                    if block_data and len(block_data) > offset:
-                        return block_data[offset:offset+self.record_size]
-                    return None
-        except IOError as e:
-            raise IOError(f"Failed to read record: {str(e)}")
+            with open(file_path, 'rb') as f:
+                f.seek(position * self.record_size)
+                data = f.read(self.record_size)
+                if len(data) == self.record_size:
+                    return data
+                return None
+        except IOError:
+            return None
     
-    def _write_record(self, position: int, record_data: bytes, to_overflow: bool = False):
-        if len(record_data) != self.record_size:
-            raise ValueError(f"Record size must be {self.record_size} bytes")
-        
-        try:
-            if to_overflow:
-                with LineCursor(self.table_info) as lc:
-                    lc.goto_line(position)
-                    lc.file.write(record_data)
-            else:
-                with BlockCursor(self.data_filename, self.block_size) as cursor:
-                    block_num = position * self.record_size // self.block_size
-                    offset = (position * self.record_size) % self.block_size
-                    
-                    # Read the entire block
-                    cursor.goto_block(block_num)
-                    block_data = cursor.read() or bytearray(self.block_size)
-                    
-                    # Modify the specific record within the block
-                    block_data = bytearray(block_data)
-                    block_data[offset:offset+self.record_size] = record_data
-                    
-                    # Write back the modified block
-                    cursor.goto_block(block_num)
-                    cursor.overwrite_current(bytes(block_data))
-        except IOError as e:
-            raise IOError(f"Failed to write record: {str(e)}")
+    def _write_record(self, file_path: str, position: int, record_data: bytes):
+        """Write a record to a file at given position"""
+        with open(file_path, 'r+b') as f:
+            f.seek(position * self.record_size)
+            f.write(record_data)
     
-    def _append_record(self, record_data: bytes, to_overflow: bool = False) -> int:
-        if len(record_data) != self.record_size:
-            raise ValueError(f"Record size must be {self.record_size} bytes")
-        
-        try:
-            if to_overflow:
-                with LineCursor(self.table_info) as lc:
-                    pos = lc.total_lines()
-                    lc.append_record([0] * len(struct.unpack(self.data_format, record_data)))  # Dummy append
-                    lc.goto_line(pos)
-                    lc.file.write(record_data)
-                    return pos
-            else:
-                with BlockCursor(self.data_filename, self.block_size) as cursor:
-                    file_size = cursor.total_blocks() * self.block_size
-                    pos = file_size // self.record_size
-                    
-                    # Calculate position in blocks
-                    block_num = pos * self.record_size // self.block_size
-                    offset = (pos * self.record_size) % self.block_size
-                    
-                    # If new record fits in existing block
-                    if offset + self.record_size <= self.block_size:
-                        cursor.goto_block(block_num)
-                        block_data = cursor.read() or bytearray(self.block_size)
-                        block_data = bytearray(block_data)
-                        block_data[offset:offset+self.record_size] = record_data
-                        cursor.overwrite_current(bytes(block_data))
-                    else:
-                        # Need to add a new block
-                        new_block = bytearray(self.block_size)
-                        new_block[0:self.record_size] = record_data
-                        cursor.append_block(bytes(new_block))
-                    return pos
-        except IOError as e:
-            raise IOError(f"Failed to append record: {str(e)}")
+    def _append_record(self, file_path: str, record_data: bytes) -> int:
+        """Append a record to a file and return its position"""
+        file_size = os.path.getsize(file_path)
+        position = file_size // self.record_size
+        with open(file_path, 'ab') as f:
+            f.write(record_data)
+        return position
     
-    def _find_insert_position(self, key: Any) -> int:
-        with BlockCursor(self.data_filename, self.block_size) as cursor:
-            file_size = cursor.total_blocks() * self.block_size
-            if file_size == 0:
-                return 0  # Empty file, insert at position 0
-                
-            low = 0
-            high = (file_size // self.record_size) - 1
-            
-            while low <= high:
-                mid = (low + high) // 2
-                mid_record = self._read_record(mid)
-                if not mid_record:
-                    break
-                    
-                mid_key = self._extract_key(mid_record)
-                
-                if mid_key < key:
-                    low = mid + 1
-                elif mid_key > key:
-                    high = mid - 1
-                else:
-                    return mid  # Key already exists
-                    
-            return low
+    def _get_aux_file_size(self) -> int:
+        """Get number of records in auxiliary file"""
+        return os.path.getsize(self.aux_filename) // self.record_size
+    
+    def _get_main_file_size(self) -> int:
+        """Get number of records in main index file"""
+        return os.path.getsize(self.index_filename) // self.record_size
+    
+    def _should_rebuild(self) -> bool:
+        """Check if auxiliary file size exceeds log n"""
+        main_size = self._get_main_file_size()
+        aux_size = self._get_aux_file_size()
+        if main_size == 0:
+            return aux_size > 1
+        return aux_size > math.log2(main_size)
     
     def _merge_files(self):
-        try:
-            # Read all records from both files
-            all_records = []
-            
-            # Read main data file using BlockCursor
-            with BlockCursor(self.data_filename, self.block_size) as cursor:
-                file_size = cursor.total_blocks() * self.block_size
-                num_records = file_size // self.record_size
-                
-                for i in range(num_records):
-                    record = self._read_record(i)
-                    if record:
-                        all_records.append(record)
-            
-            # Read overflow area using LineCursor
-            with LineCursor(self.table_info) as lc:
-                num_records = lc.total_lines()
-                for i in range(num_records):
-                    record = self._read_record(i, from_overflow=True)
-                    if record:
-                        all_records.append(record)
-            
-            # Sort all records by key
-            all_records.sort(key=self._extract_key)
-            
-            # Write back to main data file and clear overflow
-            with BlockCursor(self.data_filename, self.block_size) as cursor:
-                # Clear existing data
-                cursor.goto_block(0)
-                for _ in range(cursor.total_blocks()):
-                    cursor.overwrite_current(b'\x00' * self.block_size)
-                
-                # Write sorted records
-                for record in all_records:
-                    self._append_record(record)
-            
-            # Clear overflow area
-            with LineCursor(self.table_info) as lc:
-                for i in range(lc.total_lines()):
-                    lc.goto_line(i)
-                    lc.file.write(b'\x00' * self.record_size)
-        except IOError as e:
-            raise IOError(f"Failed to merge files: {str(e)}")
+        """Merge auxiliary and main files, removing marked records"""
+        # Read all valid records
+        records = []
+        
+        # Read from main file
+        main_size = self._get_main_file_size()
+        for i in range(main_size):
+            record = self._read_record(self.index_filename, i)
+            if record and not record.startswith(b'\x00'):  # Not marked as deleted
+                records.append(record)
+        
+        # Read from auxiliary file
+        aux_size = self._get_aux_file_size()
+        for i in range(aux_size):
+            record = self._read_record(self.aux_filename, i)
+            if record and not record.startswith(b'\x00'):  # Not marked as deleted
+                records.append(record)
+        
+        # Sort records by key
+        records.sort(key=self._extract_key)
+        
+        # Write back to main file
+        with open(self.index_filename, 'wb') as f:
+            for record in records:
+                f.write(record)
+        
+        # Clear auxiliary file
+        with open(self.aux_filename, 'wb') as f:
+            pass
     
     def build_from_data(self):
-        with BlockCursor(self.data_filename, self.block_size) as cursor:
-            if cursor.total_blocks() == 0:
-                return
-                
-        try:
-            # Read all records
-            records = []
-            with BlockCursor(self.data_filename, self.block_size) as cursor:
-                file_size = cursor.total_blocks() * self.block_size
-                num_records = file_size // self.record_size
-                
-                for i in range(num_records):
-                    record = self._read_record(i)
-                    if record:
-                        records.append(record)
-            
-            # Sort by key
-            records.sort(key=self._extract_key)
-            
-            # Write back sorted
-            with BlockCursor(self.data_filename, self.block_size) as cursor:
-                # Clear existing data
-                cursor.goto_block(0)
-                for _ in range(cursor.total_blocks()):
-                    cursor.overwrite_current(b'\x00' * self.block_size)
-                
-                # Write sorted records
-                for record in records:
-                    self._append_record(record)
-        except IOError as e:
-            raise IOError(f"Failed to build index: {str(e)}")
+        """Build index from data file"""
+        # Clear existing files
+        with open(self.index_filename, 'wb') as f:
+            pass
+        with open(self.aux_filename, 'wb') as f:
+            pass
+        
+        # Read all records from data file and sort them
+        records = []
+        with open(self.data_filename, 'rb') as f:
+            while True:
+                record = f.read(self.record_size)
+                if not record or len(record) < self.record_size:
+                    break
+                records.append(record)
+        
+        # Sort records by key
+        records.sort(key=self._extract_key)
+        
+        # Write sorted records to main index file
+        with open(self.index_filename, 'wb') as f:
+            for record in records:
+                f.write(record)
     
     def add(self, record_data: bytes):
+        """Add a record to the index"""
         if len(record_data) != self.record_size:
             raise ValueError(f"Record size must be {self.record_size} bytes")
         
-        key = self._extract_key(record_data)
+        # Add to auxiliary file
+        self._append_record(self.aux_filename, record_data)
         
-        # First check if key exists in main file
-        pos = self._find_insert_position(key)
-        existing_record = self._read_record(pos)
-        if existing_record and self._extract_key(existing_record) == key:
-            raise ValueError(f"Key {key} already exists")
-        
-        # Add to overflow area
-        self._append_record(record_data, to_overflow=True)
-        
-        # Merge if overflow area gets too large
-        with LineCursor(self.table_info) as lc:
-            if lc.total_lines() > (self.block_size // self.record_size):
-                self._merge_files()
+        # Check if we need to rebuild
+        if self._should_rebuild():
+            self._merge_files()
     
-    def search(self, key: Any) -> Optional[bytes]:
-        # Search in main data file
-        with BlockCursor(self.data_filename, self.block_size) as cursor:
-            file_size = cursor.total_blocks() * self.block_size
-            if file_size > 0:
-                low = 0
-                high = (file_size // self.record_size) - 1
-                
-                while low <= high:
-                    mid = (low + high) // 2
-                    mid_record = self._read_record(mid)
-                    if not mid_record:
-                        break
-                        
-                    mid_key = self._extract_key(mid_record)
-                    
-                    if mid_key == key:
-                        return mid_record
-                    elif mid_key < key:
-                        low = mid + 1
-                    else:
-                        high = mid - 1
+    def search(self, key: int) -> Optional[bytes]:
+        """Search for a record by key (expects uint64)"""
+        # Binary search in main file
+        left = 0
+        right = self._get_main_file_size() - 1
         
-        # If not found in main file, check overflow area
-        with LineCursor(self.table_info) as lc:
-            for i in range(lc.total_lines()):
-                record = self._read_record(i, from_overflow=True)
-                if record and self._extract_key(record) == key:
+        while left <= right:
+            mid = (left + right) // 2
+            record = self._read_record(self.index_filename, mid)
+            if not record or record.startswith(b'\x00'):  # Skip deleted records
+                right = mid - 1
+                continue
+                
+            mid_key = self._extract_key(record)
+            if mid_key == key:
+                return record
+            elif mid_key < key:
+                left = mid + 1
+            else:
+                right = mid - 1
+        
+        # Linear search in auxiliary file
+        aux_size = self._get_aux_file_size()
+        for i in range(aux_size):
+            record = self._read_record(self.aux_filename, i)
+            if record and not record.startswith(b'\x00'):  # Not marked as deleted
+                if self._extract_key(record) == key:
                     return record
         
         return None
     
-    def range_search(self, begin: Any, end: Any) -> List[bytes]:
-
+    def range_search(self, begin: int, end: int) -> List[bytes]:
+        """Search for records in a range (expects uint64)"""
         results = []
         
-        # Search in main data file
-        with BlockCursor(self.data_filename, self.block_size) as cursor:
-            file_size = cursor.total_blocks() * self.block_size
-            if file_size > 0:
-                # Find starting position
-                low = 0
-                high = (file_size // self.record_size) - 1
-                start_pos = 0
-                
-                while low <= high:
-                    mid = (low + high) // 2
-                    mid_record = self._read_record(mid)
-                    if not mid_record:
-                        break
-                        
-                    mid_key = self._extract_key(mid_record)
-                    
-                    if mid_key < begin:
-                        low = mid + 1
-                    else:
-                        high = mid - 1
-                
-                start_pos = low
-                
-                # Read sequentially from start_pos
-                for i in range(start_pos, (file_size // self.record_size)):
-                    record = self._read_record(i)
-                    if not record:
-                        break
-                        
-                    record_key = self._extract_key(record)
-                    if record_key > end:
-                        break
-                    if begin <= record_key <= end:
-                        results.append(record)
+        # Binary search for start position in main file
+        left = 0
+        right = self._get_main_file_size() - 1
+        start_pos = 0
         
-        # Search in overflow area
-        with LineCursor(self.table_info) as lc:
-            for i in range(lc.total_lines()):
-                record = self._read_record(i, from_overflow=True)
-                if record:
-                    record_key = self._extract_key(record)
-                    if begin <= record_key <= end:
-                        results.append(record)
+        while left <= right:
+            mid = (left + right) // 2
+            record = self._read_record(self.index_filename, mid)
+            if not record or record.startswith(b'\x00'):
+                right = mid - 1
+                continue
+                
+            mid_key = self._extract_key(record)
+            if mid_key < begin:
+                left = mid + 1
+            else:
+                right = mid - 1
+                start_pos = mid
         
-        # Sort all results by key (since overflow may be out of order)
+        # Sequential scan from start position in main file
+        main_size = self._get_main_file_size()
+        for i in range(start_pos, main_size):
+            record = self._read_record(self.index_filename, i)
+            if not record or record.startswith(b'\x00'):
+                continue
+                
+            key = self._extract_key(record)
+            if key > end:
+                break
+            if begin <= key <= end:
+                results.append(record)
+        
+        # Check auxiliary file
+        aux_size = self._get_aux_file_size()
+        for i in range(aux_size):
+            record = self._read_record(self.aux_filename, i)
+            if record and not record.startswith(b'\x00'):
+                key = self._extract_key(record)
+                if begin <= key <= end:
+                    results.append(record)
+        
+        # Sort results by key
         results.sort(key=self._extract_key)
         return results
     
     def remove(self, key: Any) -> bool:
-        # First try to find in main file
-        found = False
-        temp_filename = f"{self.data_filename}.temp"
+        """Remove a record by key (mark as deleted)"""
+        # Search in main file
+        left = 0
+        right = self._get_main_file_size() - 1
         
-        try:
-            # Process main data file
-            with BlockCursor(self.data_filename, self.block_size) as cursor, \
-                 BlockCursor(temp_filename, self.block_size) as temp_cursor:
+        while left <= right:
+            mid = (left + right) // 2
+            record = self._read_record(self.index_filename, mid)
+            if not record or record.startswith(b'\x00'):
+                right = mid - 1
+                continue
                 
-                file_size = cursor.total_blocks() * self.block_size
-                num_records = file_size // self.record_size
-                
-                for i in range(num_records):
-                    record = self._read_record(i)
-                    if record and self._extract_key(record) == key:
-                        found = True
-                    else:
-                        if record:
-                            self._append_record(record, to_overflow=False)
-            
-            # If found in main file, replace file
-            if found:
-                os.replace(temp_filename, self.data_filename)
+            mid_key = self._extract_key(record)
+            if mid_key == key:
+                # Mark record as deleted
+                self._write_record(self.index_filename, mid, b'\x00' * self.record_size)
                 return True
-            
-            # If not found in main file, check overflow
-            temp_line_filename = f"{self.overflow_filename}.temp"
-            found_in_overflow = False
-            with LineCursor(self.table_info) as lc, \
-                 open(temp_line_filename, 'wb') as temp_file:
-                
-                for i in range(lc.total_lines()):
-                    record = self._read_record(i, from_overflow=True)
-                    if record and self._extract_key(record) == key:
-                        found_in_overflow = True
-                    else:
-                        if record:
-                            temp_file.write(record)
-            
-            if found_in_overflow:
-                os.replace(temp_line_filename, self.overflow_filename)
-                return True
-            
-            return False
-        except IOError as e:
-            if os.path.exists(temp_filename):
-                os.remove(temp_filename)
-            if os.path.exists(temp_line_filename):
-                os.remove(temp_line_filename)
-            raise IOError(f"Failed to remove record: {str(e)}")
-        finally:
-            if os.path.exists(temp_filename):
-                os.remove(temp_filename)
-            if os.path.exists(temp_line_filename):
-                os.remove(temp_line_filename)
-    
-    def get_all_records(self) -> List[bytes]:
-        self._merge_files()  # Ensure all records are in main file and sorted
-        records = []
+            elif mid_key < key:
+                left = mid + 1
+            else:
+                right = mid - 1
         
-        with BlockCursor(self.data_filename, self.block_size) as cursor:
-            file_size = cursor.total_blocks() * self.block_size
-            num_records = file_size // self.record_size
-            
-            for i in range(num_records):
-                record = self._read_record(i)
-                if record:
-                    records.append(record)
+        # Search in auxiliary file
+        aux_size = self._get_aux_file_size()
+        for i in range(aux_size):
+            record = self._read_record(self.aux_filename, i)
+            if record and not record.startswith(b'\x00'):
+                if self._extract_key(record) == key:
+                    # Mark record as deleted
+                    self._write_record(self.aux_filename, i, b'\x00' * self.record_size)
+                    return True
         
-        return records
+        return False

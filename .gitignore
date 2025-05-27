@@ -16,9 +16,6 @@ build/
 .env*
 *.log
 
-# Database files and generated data
-src/data/
-
 # IDE and OS
 .vscode/
 .idea/
@@ -124,4 +121,4 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
-cover/ 
+cover/

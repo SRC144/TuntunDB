@@ -52,7 +52,6 @@ Sistema de gestión de bases de datos desarrollado para el curso de Base de Dato
 - Operaciones CRD (No se implemento comando update)
 - Indexación:
   - B+Tree
-  - Sequential File
 - Tipos de datos soportados: INT, VARCHAR, DATE, ARRAY
 - Importación desde CSV con inferencia de tipos
 - Estrategia de reindexación:
